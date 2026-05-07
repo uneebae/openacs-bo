@@ -7,13 +7,15 @@ interface TopbarProps {
   userName?: string;
   userRole?: string;
   lastLogin?: string;
+  onSignOut?: () => void;
 }
 
 export function Topbar({
   onMenuClick,
-  userName = 'John Anderson',
-  userRole = 'Admin',
-  lastLogin = '2h ago'
+  userName = 'Uneeb Ahmed',
+  userRole = 'Super Admin',
+  lastLogin = '2h ago',
+  onSignOut
 }: TopbarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -189,7 +191,13 @@ export function Topbar({
                   </div>
                   
                   <div className="border-t border-gray-200 dark:border-gray-700 py-2">
-                    <button className="w-full px-4 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-3 font-medium">
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        onSignOut?.();
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-3 font-medium"
+                    >
                       <LogOut size={16} />
                       <span>Sign Out</span>
                     </button>

@@ -34,6 +34,8 @@ export function Login({ onLogin }: LoginProps) {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [loginError, setLoginError] = useState('');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -42,9 +44,16 @@ export function Login({ onLogin }: LoginProps) {
     }
 
     setIsLoading(true);
-    // Simulate API call
+    setLoginError('');
+
+    // Validate credentials
     setTimeout(() => {
-      onLogin();
+      if (username === 'uneeb_ahmed' && password === 'admin123') {
+        onLogin();
+      } else {
+        setLoginError('Invalid username or password. Please try again.');
+        setIsLoading(false);
+      }
     }, 1000);
   };
 
@@ -188,6 +197,17 @@ export function Login({ onLogin }: LoginProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {loginError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                >
+                  <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                  <p className="text-sm text-red-600 dark:text-red-400">{loginError}</p>
+                </motion.div>
+              )}
+
               <Input
                 label="Username"
                 type="text"
@@ -250,7 +270,17 @@ export function Login({ onLogin }: LoginProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400"
+              className="mt-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+            >
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-1 font-medium">Demo Credentials</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-center">Username: <span className="font-mono text-gray-600 dark:text-gray-300">uneeb_ahmed</span> &nbsp;|&nbsp; Password: <span className="font-mono text-gray-600 dark:text-gray-300">admin123</span></p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400"
             >
               Version 2.4.1 • © 2024 OpenACS
             </motion.div>

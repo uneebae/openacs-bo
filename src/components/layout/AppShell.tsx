@@ -6,10 +6,11 @@ import { motion } from 'framer-motion';
 interface AppShellProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  onSignOut?: () => void;
   children: React.ReactNode;
 }
 
-export function AppShell({ currentPage, onNavigate, children }: AppShellProps) {
+export function AppShell({ currentPage, onNavigate, onSignOut, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -52,7 +53,7 @@ export function AppShell({ currentPage, onNavigate, children }: AppShellProps) {
         }}
         className="lg:block hidden min-h-screen"
       >
-        <Topbar onMenuClick={() => setMobileSidebarOpen(true)} />
+        <Topbar onMenuClick={() => setMobileSidebarOpen(true)} userName="Uneeb Ahmed" userRole="Super Admin" onSignOut={onSignOut} />
         <main className="p-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -66,7 +67,7 @@ export function AppShell({ currentPage, onNavigate, children }: AppShellProps) {
 
       {/* Mobile Main Content */}
       <div className="lg:hidden min-h-screen">
-        <Topbar onMenuClick={() => setMobileSidebarOpen(true)} />
+        <Topbar onMenuClick={() => setMobileSidebarOpen(true)} userName="Uneeb Ahmed" userRole="Super Admin" onSignOut={onSignOut} />
         <main className="p-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

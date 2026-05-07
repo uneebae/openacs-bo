@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { ModuleDirectory } from './pages/ModuleDirectory';
@@ -13,12 +13,15 @@ import { AuthenticationHistory } from './pages/AuthenticationHistory';
 import { CardStatusManagement } from './pages/CardStatusManagement';
 import { ReportCatalog } from './pages/ReportCatalog';
 import { AppShell } from './components/layout/AppShell';
-import { CreditCard, FileBarChart } from 'lucide-react';
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const handleLogin = () => {
     setIsAuthenticated(true);
+    setCurrentPage('dashboard');
+  };
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
     setCurrentPage('dashboard');
   };
   if (!isAuthenticated) {
@@ -55,7 +58,7 @@ export function App() {
     }
   };
   return (
-    <AppShell currentPage={currentPage} onNavigate={setCurrentPage}>
+    <AppShell currentPage={currentPage} onNavigate={setCurrentPage} onSignOut={handleSignOut}>
       {renderPage()}
     </AppShell>);
 
