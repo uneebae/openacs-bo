@@ -40,24 +40,33 @@ export function AuthenticationHistory() {
   const [dataSource, setDataSource] = useState<'firebase' | 'local'>('local');
   const [isSeeding, setIsSeeding] = useState(false);
 
-  // Load data from Firebase on component mount
+  // Load data on component mount - show local data first, then try Firebase
   useEffect(() => {
+    // Always load local data first for instant UI
+    loadLocalData();
+    setDataSource('local');
+    
+    // Then try to load from Firebase in background
     loadDataFromFirebase();
   }, []);
 
   const loadDataFromFirebase = async () => {
     setIsLoadingFromFirebase(true);
     try {
-      const firebaseData = await getAuthTransactions();
+      // Add 5 second timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Firebase connection timeout')), 5000)
+      );
+      
+      const firebasePromise = getAuthTransactions();
+      const firebaseData = await Promise.race([firebasePromise, timeoutPromise]) as any;
       
       if (firebaseData.length === 0) {
-        // If Firebase is empty, load from local data
         console.log('Firebase empty, loading local data');
         loadLocalData();
         setDataSource('local');
       } else {
-        // Transform Firebase data to transaction format
-        const transformedData: Transaction[] = firebaseData.map((record, index) => ({
+        const transformedData: Transaction[] = firebaseData.map((record: any, index: number) => ({
           id: index + 1,
           dateTime: record.dateTime,
           acsTransactionId: record.acsTransactionId,
