@@ -108,13 +108,15 @@ export function AuthenticationHistory() {
     setIsSeeding(true);
     try {
       await seedDataToFirebase();
-      alert('✅ Data successfully seeded to Firebase!');
+      alert('✅ Data successfully seeded to Firebase! Refreshing...');
+      // Wait a moment for Firebase to sync
+      await new Promise(resolve => setTimeout(resolve, 1000));
       // Reload from Firebase
       await loadDataFromFirebase();
+      setIsSeeding(false);
     } catch (error) {
       console.error('Error seeding data:', error);
       alert('❌ Error seeding data. Check console for details.');
-    } finally {
       setIsSeeding(false);
     }
   };

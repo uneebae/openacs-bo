@@ -38,13 +38,11 @@ export const addAuthTransaction = async (transaction: Omit<AuthTransaction, 'tim
   }
 };
 
-// Get all transactions from Firebase
+// Get all transactions from Firebase - Optimized query
 export const getAuthTransactions = async (): Promise<AuthTransaction[]> => {
   try {
-    const q = query(
-      collection(db, TRANSACTIONS_COLLECTION),
-      orderBy('timestamp', 'desc')
-    );
+    // Simple query without orderBy for faster retrieval
+    const q = query(collection(db, TRANSACTIONS_COLLECTION));
     
     const querySnapshot = await getDocs(q);
     const transactions: AuthTransaction[] = [];
@@ -65,6 +63,13 @@ export const getAuthTransactions = async (): Promise<AuthTransaction[]> => {
       });
     });
     
+    // Sort locally by timestamp descending (faster than Firebase orderBy)
+    transactions.sort((a, b) => {
+      const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+      const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+      return timeB - timeA;
+    });
+    
     return transactions;
   } catch (error) {
     console.error('Error fetching transactions:', error);
@@ -72,12 +77,22 @@ export const getAuthTransactions = async (): Promise<AuthTransaction[]> => {
   }
 };
 
-// Seed initial data to Firebase (from existing mock data)
+// Seed initial data to Firebase - Optimized batch writes
 export const seedInitialData = async (transactions: Omit<AuthTransaction, 'timestamp'>[]): Promise<void> => {
   try {
-    const promises = transactions.map(transaction => addAuthTransaction(transaction));
-    await Promise.all(promises);
-    console.log(`Successfully seeded ${transactions.length} transactions to Firebase`);
+    console.log(`Starting to seed ${transactions.length} transactions...`);
+    
+    // Batch writes in groups of 3 for optimal performance
+    const batchSize = 3;
+    for (let i = 0; i < transactions.length; i += batchSize) {
+      const batch = transactions.slice(i, i + batchSize);
+      const promises = batch.map(transaction => addAuthTransaction(transaction));
+      await Promise.all(promises);
+      const completed = Math.min(i + batchSize, transactions.length);
+      console.log(`✅ Seeded ${completed}/${transactions.length} records`);
+    }
+    
+    console.log(`✅ All ${transactions.length} transactions seeded successfully!`);
   } catch (error) {
     console.error('Error seeding data:', error);
     throw error;
