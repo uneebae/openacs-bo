@@ -12,7 +12,6 @@ import { ApiConfigManagement } from './pages/ApiConfigManagement';
 import { AuthenticationHistory } from './pages/AuthenticationHistory';
 import { CardStatusManagement } from './pages/CardStatusManagement';
 import { ReportCatalog } from './pages/ReportCatalog';
-import Checkout from './pages/Checkout';
 import { AppShell } from './components/layout/AppShell';
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,8 +31,6 @@ export function App() {
     switch (currentPage) {
       case 'dashboard':
         return <Dashboard onNavigate={setCurrentPage} />;
-      case 'checkout':
-        return <Checkout onBack={() => setCurrentPage('dashboard')} />;
       case 'modules':
         return <ModuleDirectory />;
       case 'roles':
