@@ -200,6 +200,18 @@ export function ParticipantManagement() {
     setShowModal(true);
   };
 
+  const handleDelete = (participant: any) => {
+    if (!window.confirm(`Are you sure you want to delete "${participant.name}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    // Remove participant from state
+    setParticipants(participants.filter(p => p.id !== participant.id));
+    
+    // Show success message
+    alert(`✅ Participant "${participant.name}" deleted successfully!`);
+  };
+
   const handleNext = () => {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
@@ -372,7 +384,7 @@ export function ParticipantManagement() {
               <Button variant="outline" size="sm" leftIcon={<Edit size={14} />} onClick={() => handleEdit(participant)} className="flex-1">
                 Edit
               </Button>
-              <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} />
+              <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} onClick={() => handleDelete(participant)} className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20" />
             </div>
           </motion.div>
         ))}
