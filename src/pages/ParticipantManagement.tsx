@@ -1101,43 +1101,48 @@ export function ParticipantManagement() {
                           {/* professional content layout */}
                           <div className="relative z-10 flex flex-col h-full min-h-[420px] justify-between p-4">
                             
-                            {/* header section with logo */}
-                            <div className="flex flex-col items-center gap-2">
-                              {/* logo positioning */}
-                              <div className={`w-full flex ${
-                                formData.acsLogoPosition === 'top-left'     ? 'justify-start' :
-                                formData.acsLogoPosition === 'top-right'    ? 'justify-end' :
-                                                                              'justify-center'
-                              }`}>
-                                {logoFile ? (
-                                  <motion.img
-                                    src={URL.createObjectURL(logoFile)}
-                                    alt="logo"
-                                    className="h-10 object-contain"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.3 }}
-                                  />
-                                ) : (
-                                  <motion.div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg backdrop-blur-sm"
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                  >
-                                    <Building2 size={13} className="text-gray-700" />
-                                    <span className="text-xs font-bold text-gray-700 dark:text-white">{formData.name || 'Bank'}</span>
-                                  </motion.div>
-                                )}
-                              </div>
+                            {/* header section with logo - only show if top position */}
+                            {(formData.acsLogoPosition === 'top-left' || formData.acsLogoPosition === 'top-right') && (
+                              <div className="flex flex-col items-center gap-2">
+                                {/* logo positioning */}
+                                <div className={`w-full flex ${
+                                  formData.acsLogoPosition === 'top-left' ? 'justify-start' : 'justify-end'
+                                }`}>
+                                  {logoFile ? (
+                                    <motion.img
+                                      src={URL.createObjectURL(logoFile)}
+                                      alt="logo"
+                                      className="h-10 object-contain"
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ duration: 0.3 }}
+                                    />
+                                  ) : (
+                                    <motion.div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg backdrop-blur-sm"
+                                      initial={{ opacity: 0, y: -10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                    >
+                                      <Building2 size={13} className="text-gray-700 dark:text-gray-300" />
+                                      <span className="text-xs font-bold text-gray-700 dark:text-white">{formData.name || 'Bank'}</span>
+                                    </motion.div>
+                                  )}
+                                </div>
 
-                              {/* security badge */}
-                              <motion.div className="flex items-center gap-1.5 mt-1"
-                                animate={{ opacity: [0.8, 1, 0.8] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                              >
-                                <Lock size={12} className="text-green-500" />
-                                <span className="text-[9px] font-semibold text-green-500">Secure Connection</span>
-                              </motion.div>
-                            </div>
+                                {/* security badge */}
+                                <motion.div className="flex items-center gap-1.5 mt-1"
+                                  animate={{ opacity: [0.8, 1, 0.8] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                  <Lock size={12} className="text-green-500" />
+                                  <span className="text-[9px] font-semibold text-green-500">Secure Connection</span>
+                                </motion.div>
+                              </div>
+                            )}
+                            
+                            {/* spacer for bottom positions */}
+                            {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-right') && (
+                              <div className="h-4"></div>
+                            )}
 
                             {/* main content card */}
                             <div className="flex-1 flex items-center justify-center">
@@ -1240,16 +1245,37 @@ export function ParticipantManagement() {
 
                             {/* bottom positioning logo if set */}
                             {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-right') && (
-                              <div className={`flex ${formData.acsLogoPosition === 'bottom-left' ? 'justify-start' : 'justify-end'}`}>
-                                {logoFile && (
-                                  <motion.img
-                                    src={URL.createObjectURL(logoFile)}
-                                    alt="logo"
-                                    className="h-8 object-contain opacity-80"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 0.8 }}
-                                  />
-                                )}
+                              <div className="flex flex-col items-center gap-2">
+                                {/* security badge */}
+                                <motion.div className="flex items-center gap-1.5"
+                                  animate={{ opacity: [0.8, 1, 0.8] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                  <Lock size={12} className="text-green-500" />
+                                  <span className="text-[9px] font-semibold text-green-500">Secure Connection</span>
+                                </motion.div>
+
+                                {/* logo positioning */}
+                                <div className={`w-full flex ${formData.acsLogoPosition === 'bottom-left' ? 'justify-start' : 'justify-end'}`}>
+                                  {logoFile ? (
+                                    <motion.img
+                                      src={URL.createObjectURL(logoFile)}
+                                      alt="logo"
+                                      className="h-10 object-contain"
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ duration: 0.3 }}
+                                    />
+                                  ) : (
+                                    <motion.div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg backdrop-blur-sm"
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                    >
+                                      <Building2 size={13} className="text-gray-700 dark:text-gray-300" />
+                                      <span className="text-xs font-bold text-gray-700 dark:text-white">{formData.name || 'Bank'}</span>
+                                    </motion.div>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
