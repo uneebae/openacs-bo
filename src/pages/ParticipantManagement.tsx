@@ -945,8 +945,10 @@ export function ParticipantManagement() {
                       onChange={(e) => setFormData({ ...formData, acsLogoPosition: e.target.value })}
                       options={[
                         { value: 'top-left',     label: 'Top Left' },
+                        { value: 'top-center',   label: 'Top Center' },
                         { value: 'top-right',    label: 'Top Right' },
                         { value: 'bottom-left',  label: 'Bottom Left' },
+                        { value: 'bottom-center', label: 'Bottom Center' },
                         { value: 'bottom-right', label: 'Bottom Right' },
                       ]}
                     />
@@ -1102,11 +1104,13 @@ export function ParticipantManagement() {
                           <div className="relative z-10 flex flex-col h-full min-h-[420px] justify-between p-4">
                             
                             {/* header section with logo - only show if top position */}
-                            {(formData.acsLogoPosition === 'top-left' || formData.acsLogoPosition === 'top-right') && (
+                            {(formData.acsLogoPosition === 'top-left' || formData.acsLogoPosition === 'top-center' || formData.acsLogoPosition === 'top-right') && (
                               <div className="flex flex-col items-center gap-2">
                                 {/* logo positioning */}
                                 <div className={`w-full flex ${
-                                  formData.acsLogoPosition === 'top-left' ? 'justify-start' : 'justify-end'
+                                  formData.acsLogoPosition === 'top-left' ? 'justify-start' :
+                                  formData.acsLogoPosition === 'top-center' ? 'justify-center' :
+                                  'justify-end'
                                 }`}>
                                   {logoFile ? (
                                     <motion.img
@@ -1140,7 +1144,7 @@ export function ParticipantManagement() {
                             )}
                             
                             {/* spacer for bottom positions */}
-                            {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-right') && (
+                            {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-center' || formData.acsLogoPosition === 'bottom-right') && (
                               <div className="h-4"></div>
                             )}
 
@@ -1244,7 +1248,7 @@ export function ParticipantManagement() {
                             </div>
 
                             {/* bottom positioning logo if set */}
-                            {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-right') && (
+                            {(formData.acsLogoPosition === 'bottom-left' || formData.acsLogoPosition === 'bottom-center' || formData.acsLogoPosition === 'bottom-right') && (
                               <div className="flex flex-col items-center gap-2">
                                 {/* security badge */}
                                 <motion.div className="flex items-center gap-1.5"
@@ -1256,7 +1260,11 @@ export function ParticipantManagement() {
                                 </motion.div>
 
                                 {/* logo positioning */}
-                                <div className={`w-full flex ${formData.acsLogoPosition === 'bottom-left' ? 'justify-start' : 'justify-end'}`}>
+                                <div className={`w-full flex ${
+                                  formData.acsLogoPosition === 'bottom-left' ? 'justify-start' :
+                                  formData.acsLogoPosition === 'bottom-center' ? 'justify-center' :
+                                  'justify-end'
+                                }`}>
                                   {logoFile ? (
                                     <motion.img
                                       src={URL.createObjectURL(logoFile)}
