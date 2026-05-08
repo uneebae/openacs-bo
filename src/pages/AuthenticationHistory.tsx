@@ -95,22 +95,25 @@ export function AuthenticationHistory() {
   };
 
   const handleSeedToFirebase = async () => {
-    if (!window.confirm('This will seed the initial 10 records to Firebase. Continue?')) {
+    if (!window.confirm('This will load 10 sample transactions. Continue?')) {
       return;
     }
     
     setIsSeeding(true);
+    console.log('🌱 Starting to seed sample data...');
     try {
       await seedDataToFirebase();
-      alert('✅ Data successfully seeded to Firebase! Refreshing...');
-      // Wait a moment for Firebase to sync
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Reload from Firebase
+      console.log('✅ Seeding complete!');
+      alert('✅ Sample data loaded successfully!');
+      // Small delay then reload
+      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('🔄 Reloading data from storage...');
       await loadDataFromFirebase();
+      console.log('✅ Data reloaded!');
       setIsSeeding(false);
     } catch (error) {
-      console.error('Error seeding data:', error);
-      alert('❌ Error seeding data. Check console for details.');
+      console.error('❌ Error seeding data:', error);
+      alert('❌ Error loading sample data. Check console (F12) for details.');
       setIsSeeding(false);
     }
   };

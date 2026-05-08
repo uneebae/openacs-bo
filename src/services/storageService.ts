@@ -52,16 +52,22 @@ const getStoredTransactions = (): AuthTransaction[] => {
 // Seed initial data to localStorage
 export const seedInitialData = async (transactions: AuthTransaction[]): Promise<void> => {
   try {
-    console.log(`Starting to seed ${transactions.length} transactions...`);
+    console.log(`📥 Seeding ${transactions.length} transactions to localStorage...`);
     
     const stored = getStoredTransactions();
+    console.log(`📊 Current storage has ${stored.length} records`);
+    
     const combined = [...transactions, ...stored];
+    console.log(`📝 Combined total: ${combined.length} records`);
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
     
-    console.log(`✅ All ${transactions.length} transactions seeded successfully!`);
+    // Verify it was saved
+    const verified = localStorage.getItem(STORAGE_KEY);
+    console.log(`✅ Verified: ${verified ? 'Data saved successfully' : 'ERROR: Data not saved'}`);
+    console.log(`💾 Storage size: ${verified ? Math.round(verified.length / 1024) : 0} KB`);
   } catch (error) {
-    console.error('Error seeding data:', error);
+    console.error('❌ Error seeding data:', error);
     throw error;
   }
 };

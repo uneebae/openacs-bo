@@ -19,16 +19,19 @@ export const convertToStorageFormat = (records: any[]): AuthTransaction[] => {
 // Seed data to localStorage
 export const seedDataToFirebase = async (): Promise<void> => {
   try {
-    console.log('Loading authentication data...');
+    console.log('📂 Loading authentication data...');
     const authData = loadAuthenticationData();
+    console.log(`✅ Loaded ${authData.length} records`);
     
-    console.log('Converting to storage format...');
+    console.log('🔄 Converting to storage format...');
     const storageData = convertToStorageFormat(authData);
+    console.log(`✅ Converted ${storageData.length} records`);
     
-    console.log('Seeding to localStorage...');
+    console.log('💾 Seeding to localStorage...');
     await seedInitialData(storageData);
     
     console.log('✅ Data successfully seeded to localStorage!');
+    console.log('📊 Current storage contents:', localStorage.getItem('openacs_transactions'));
   } catch (error) {
     console.error('❌ Error seeding data:', error);
     throw error;
