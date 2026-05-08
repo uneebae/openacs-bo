@@ -12,6 +12,7 @@ import {
   History,
   CreditCard,
   FileBarChart,
+  ShoppingCart,
   ChevronLeft,
   ChevronRight,
   Moon,
@@ -33,6 +34,11 @@ const menuItems = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard
+  },
+  {
+    id: 'checkout',
+    label: 'Demo Checkout',
+    icon: ShoppingCart
   },
   {
     id: 'modules',

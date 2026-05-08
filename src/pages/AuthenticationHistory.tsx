@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, Download, History, FileText } from 'lucide-react';
+import { Eye, Download, History, FileText, Database, RefreshCw } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { FilterBar } from '../components/common/FilterBar';
 import { DataTable } from '../components/common/DataTable';
@@ -11,6 +11,8 @@ import { EmptyState } from '../components/common/EmptyState';
 import { Modal } from '../components/forms/Modal';
 import { Button } from '../components/forms/Button';
 import { loadAuthenticationData, generateAuthenticationExcel } from '../utils/generateAuthData';
+import { getAuthTransactions } from '../services/firebaseService';
+import { seedDataToFirebase } from '../utils/seedFirebaseData';
 
 interface Transaction {
   id: number;
@@ -34,11 +36,55 @@ export function AuthenticationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isLoadingFromFirebase, setIsLoadingFromFirebase] = useState(false);
+  const [dataSource, setDataSource] = useState<'firebase' | 'local'>('local');
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  // Load data from Excel utility on component mount
+  // Load data from Firebase on component mount
   useEffect(() => {
+    loadDataFromFirebase();
+  }, []);
+
+  const loadDataFromFirebase = async () => {
+    setIsLoadingFromFirebase(true);
+    try {
+      const firebaseData = await getAuthTransactions();
+      
+      if (firebaseData.length === 0) {
+        // If Firebase is empty, load from local data
+        console.log('Firebase empty, loading local data');
+        loadLocalData();
+        setDataSource('local');
+      } else {
+        // Transform Firebase data to transaction format
+        const transformedData: Transaction[] = firebaseData.map((record, index) => ({
+          id: index + 1,
+          dateTime: record.dateTime,
+          acsTransactionId: record.acsTransactionId,
+          merchantName: record.merchantName,
+          cardHolder: record.cardHolder,
+          cardNumber: record.cardNumber,
+          amount: record.amount,
+          status: record.status.toLowerCase(),
+          transactionType: record.transactionType,
+          scheme: record.scheme
+        }));
+        setTransactions(transformedData);
+        setDataSource('firebase');
+        console.log('✅ Loaded', transformedData.length, 'transactions from Firebase');
+      }
+    } catch (error) {
+      console.error('Error loading from Firebase:', error);
+      console.log('Falling back to local data');
+      loadLocalData();
+      setDataSource('local');
+    } finally {
+      setIsLoadingFromFirebase(false);
+    }
+  };
+
+  const loadLocalData = () => {
     const excelData = loadAuthenticationData();
-    // Transform Excel data to transaction format
     const transformedData: Transaction[] = excelData.map((record, index) => ({
       id: index + 1,
       dateTime: record['Date & Time'],
@@ -52,7 +98,26 @@ export function AuthenticationHistory() {
       scheme: record['Scheme']
     }));
     setTransactions(transformedData);
-  }, []);
+  };
+
+  const handleSeedToFirebase = async () => {
+    if (!window.confirm('This will seed the initial 10 records to Firebase. Continue?')) {
+      return;
+    }
+    
+    setIsSeeding(true);
+    try {
+      await seedDataToFirebase();
+      alert('✅ Data successfully seeded to Firebase!');
+      // Reload from Firebase
+      await loadDataFromFirebase();
+    } catch (error) {
+      console.error('Error seeding data:', error);
+      alert('❌ Error seeding data. Check console for details.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   // Download Excel file handler
   const handleDownloadExcel = () => {
@@ -219,6 +284,41 @@ ${new Date().toLocaleString()}
           onClick: handleDownloadExcel
         }} />
       
+      {/* Firebase Controls */}
+      <div className="mb-4 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex items-center gap-3">
+          <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              Data Source: <span className="text-blue-600 dark:text-blue-400">{dataSource === 'firebase' ? 'Firebase Realtime' : 'Local Mock Data'}</span>
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {dataSource === 'firebase' ? 'Connected to Firebase Firestore' : 'Using local mock data - seed to Firebase to enable live updates'}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {dataSource === 'local' && (
+            <button
+              onClick={handleSeedToFirebase}
+              disabled={isSeeding}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            >
+              <Database className="w-4 h-4" />
+              {isSeeding ? 'Seeding...' : 'Seed to Firebase'}
+            </button>
+          )}
+          <button
+            onClick={loadDataFromFirebase}
+            disabled={isLoadingFromFirebase}
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoadingFromFirebase ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
+      
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm">
@@ -226,7 +326,7 @@ ${new Date().toLocaleString()}
             Total Transactions
           </p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white mt-3">{transactions.length}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">From Excel data</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">From {dataSource === 'firebase' ? 'Firebase' : 'local data'}</p>
         </div>
         <div className="bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600/50 transition-all shadow-sm">
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Successful</p>
