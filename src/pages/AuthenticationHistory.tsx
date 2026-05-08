@@ -57,11 +57,16 @@ export function AuthenticationHistory() {
         setTransactions([]);
       } else {
         const transformedData: Transaction[] = (storageData as any).map((record: any, index: number) => {
-          // Map 'Successful' → 'success', 'Failed' → 'failed', 'Rejected' → 'rejected'
+          // Map status from Firebase format to UI format
+          // Firebase can have: 'Success', 'Successful', 'Failed', 'Rejected'
+          // UI expects: 'success', 'failed', 'rejected'
           let normalizedStatus = 'failed';
-          if (record.status === 'Successful') normalizedStatus = 'success';
-          else if (record.status === 'Failed') normalizedStatus = 'failed';
-          else if (record.status === 'Rejected') normalizedStatus = 'rejected';
+          const status = record.status || '';
+          if (status === 'Successful' || status === 'Success') normalizedStatus = 'success';
+          else if (status === 'Failed' || status === 'Failure') normalizedStatus = 'failed';
+          else if (status === 'Rejected' || status === 'Reject') normalizedStatus = 'rejected';
+          
+          console.log(`Transaction ${record.acsTransactionId}: Firebase status="${record.status}" → UI status="${normalizedStatus}"`);
           
           return {
             id: index + 1,
