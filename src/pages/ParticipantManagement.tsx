@@ -46,6 +46,7 @@ const participantTypeOptions = [
 ];
 
 export function ParticipantManagement() {
+  const [participants, setParticipants] = useState(mockParticipants);
   const [showModal, setShowModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,11 +214,88 @@ export function ParticipantManagement() {
 
   const handleSubmit = () => {
     console.log('Submitting:', formData);
+    
+    // Create new participant object
+    const typeLabel = participantTypeOptions.find(opt => opt.value === formData.type)?.label || formData.type;
+    
+    const newParticipant = {
+      id: participants.length + 1,
+      name: formData.name,
+      bin: formData.bin,
+      type: typeLabel,
+      contactPerson: formData.contactPerson,
+      email: formData.primaryEmail,
+      phone: formData.primaryMobile,
+      address: formData.address,
+      city: formData.city,
+      country: formData.country,
+      status: 'active'
+    };
+    
+    // Add to participants list
+    setParticipants([...participants, newParticipant]);
+    
+    // Reset form
+    setFormData({
+      name: '',
+      primaryEmail: '',
+      secondaryEmail: '',
+      primaryMobile: '',
+      secondaryMobile: '',
+      contactPerson: '',
+      logo: null,
+      scheme: '',
+      bin: '',
+      cardRangeStart: '',
+      cardRangeEnd: '',
+      type: '',
+      cardValidationManagedBy: '',
+      otpGenerator: '',
+      otpValidity: '60',
+      otpValidityUnit: 'seconds',
+      otpCharacteristics: '6-digit',
+      customerSelectOtpMedium: false,
+      otpDeliveryMethods: {
+        sms: true,
+        email: false,
+        inApp: false
+      },
+      otpMediumSelectable: {
+        sms: true,
+        email: false,
+        inApp: false
+      },
+      autoGenerateSMS: true,
+      smsTemplate: 'Your OTP code is {OTP}. Do not share this code with anyone. It is valid for {VALIDITY}.',
+      emailSenderId: 'support@paysyslabs.com',
+      emailSubject: 'OTP Verification',
+      emailBody: 'Dear Customer,\n\nYour OTP code is {OTP}.\nIt will expire in {VALIDITY}.\n\nDo not share this code with anyone.\n\nRegards,\nPaysys Labs',
+      enableMultiLanguageOtp: false,
+      multiLangSMS: '',
+      multiLangEmail: '',
+      acsLogoPosition: 'top-left',
+      acsButtonColor: '#3B82F6',
+      acsBackgroundColor: '#F0F4FF',
+      acsBackgroundImage: null,
+      acsFontStyle: 'Arial',
+      acsFontSize: '14',
+      acsContactLink: 'contact@paysyslabs.com',
+      address: '',
+      city: '',
+      country: '',
+      notes: ''
+    });
+    
+    // Close modal and reset step
     setShowModal(false);
     setCurrentStep(1);
+    setLogoFile(null);
+    
+    // Show success message
+    alert(`✅ Participant "${newParticipant.name}" added successfully!`);
   };
 
-  const filteredParticipants = mockParticipants.filter(p =>
+  const filteredParticipants = participants.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.bin.includes(searchQuery)
   );
