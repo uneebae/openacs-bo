@@ -11,7 +11,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { Modal } from '../components/forms/Modal';
 import { Button } from '../components/forms/Button';
 import { loadAuthenticationData, generateAuthenticationExcel } from '../utils/generateAuthData';
-import { getAuthTransactions } from '../services/firebaseService';
+import { getAuthTransactions } from '../services/storageService';
 import { seedDataToFirebase } from '../utils/seedFirebaseData';
 
 interface Transaction {
@@ -37,36 +37,24 @@ export function AuthenticationHistory() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isLoadingFromFirebase, setIsLoadingFromFirebase] = useState(false);
-  const [dataSource, setDataSource] = useState<'firebase' | 'local'>('local');
   const [isSeeding, setIsSeeding] = useState(false);
 
-  // Load data on component mount - show local data first, then try Firebase
+  // Load data on component mount
   useEffect(() => {
-    // Always load local data first for instant UI
-    loadLocalData();
-    setDataSource('local');
-    
-    // Then try to load from Firebase in background
     loadDataFromFirebase();
   }, []);
 
   const loadDataFromFirebase = async () => {
     setIsLoadingFromFirebase(true);
     try {
-      // Add 5 second timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Firebase connection timeout')), 5000)
-      );
+      // Load from localStorage (instant, no timeout needed)
+      const storageData = await getAuthTransactions();
       
-      const firebasePromise = getAuthTransactions();
-      const firebaseData = await Promise.race([firebasePromise, timeoutPromise]) as any;
-      
-      if (firebaseData.length === 0) {
-        console.log('Firebase empty, loading local data');
+      if (storageData.length === 0) {
+        console.log('No data in storage, using local mock data');
         loadLocalData();
-        setDataSource('local');
       } else {
-        const transformedData: Transaction[] = firebaseData.map((record: any, index: number) => ({
+        const transformedData: Transaction[] = (storageData as any).map((record: any, index: number) => ({
           id: index + 1,
           dateTime: record.dateTime,
           acsTransactionId: record.acsTransactionId,
@@ -79,14 +67,11 @@ export function AuthenticationHistory() {
           scheme: record.scheme
         }));
         setTransactions(transformedData);
-        setDataSource('firebase');
-        console.log('✅ Loaded', transformedData.length, 'transactions from Firebase');
+        console.log('✅ Loaded', transformedData.length, 'transactions from storage');
       }
     } catch (error) {
-      console.error('Error loading from Firebase:', error);
-      console.log('Falling back to local data');
+      console.error('Error loading from storage:', error);
       loadLocalData();
-      setDataSource('local');
     } finally {
       setIsLoadingFromFirebase(false);
     }
@@ -295,30 +280,28 @@ ${new Date().toLocaleString()}
           onClick: handleDownloadExcel
         }} />
       
-      {/* Firebase Controls */}
+      {/* Storage Controls */}
       <div className="mb-4 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center gap-3">
           <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              Data Source: <span className="text-blue-600 dark:text-blue-400">{dataSource === 'firebase' ? 'Firebase Realtime' : 'Local Mock Data'}</span>
+              Data Storage: <span className="text-blue-600 dark:text-blue-400">Local Storage</span>
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {dataSource === 'firebase' ? 'Connected to Firebase Firestore' : 'Using local mock data - seed to Firebase to enable live updates'}
+              All data is stored locally in your browser (offline capable)
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          {dataSource === 'local' && (
-            <button
-              onClick={handleSeedToFirebase}
-              disabled={isSeeding}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
-            >
-              <Database className="w-4 h-4" />
-              {isSeeding ? 'Seeding...' : 'Seed to Firebase'}
-            </button>
-          )}
+          <button
+            onClick={handleSeedToFirebase}
+            disabled={isSeeding}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+          >
+            <Database className="w-4 h-4" />
+            {isSeeding ? 'Seeding...' : 'Load Sample Data'}
+          </button>
           <button
             onClick={loadDataFromFirebase}
             disabled={isLoadingFromFirebase}
@@ -337,7 +320,7 @@ ${new Date().toLocaleString()}
             Total Transactions
           </p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white mt-3">{transactions.length}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">From {dataSource === 'firebase' ? 'Firebase' : 'local data'}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">From storage</p>
         </div>
         <div className="bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600/50 transition-all shadow-sm">
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Successful</p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, ArrowLeft, CheckCircle, Smartphone, Mail, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { addAuthTransaction } from '../../services/firebaseService';
+import { addAuthTransaction } from '../../services/storageService';
 
 interface ACSAuthenticationProps {
   paymentData: any;
@@ -71,7 +71,7 @@ const ACSAuthentication: React.FC<ACSAuthenticationProps> = ({
     if (enteredOTP === generatedOTP || enteredOTP === '123456') {
       setVerificationStatus('success');
       
-      // Write transaction to Firebase
+      // Write transaction to localStorage
       try {
         const transactionData = {
           dateTime: new Date().toLocaleString('en-US', {
@@ -94,7 +94,7 @@ const ACSAuthentication: React.FC<ACSAuthenticationProps> = ({
         };
 
         await addAuthTransaction(transactionData);
-        console.log('✅ Transaction saved to Firebase:', transactionData);
+        console.log('✅ Transaction saved to localStorage:', transactionData);
 
         // Wait a moment to show success animation
         setTimeout(() => {

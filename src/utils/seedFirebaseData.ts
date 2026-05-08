@@ -1,8 +1,8 @@
 import { loadAuthenticationData } from './generateAuthData';
-import { seedInitialData, AuthTransaction } from '../services/firebaseService';
+import { seedInitialData, AuthTransaction } from '../services/storageService';
 
-// Convert authentication records to Firebase format
-export const convertToFirebaseFormat = (records: any[]): Omit<AuthTransaction, 'timestamp'>[] => {
+// Convert authentication records to Storage format
+export const convertToStorageFormat = (records: any[]): AuthTransaction[] => {
   return records.map(record => ({
     dateTime: record['Date & Time'],
     acsTransactionId: record['ACS Transaction ID'],
@@ -16,19 +16,19 @@ export const convertToFirebaseFormat = (records: any[]): Omit<AuthTransaction, '
   }));
 };
 
-// Seed data to Firebase
+// Seed data to localStorage
 export const seedDataToFirebase = async (): Promise<void> => {
   try {
     console.log('Loading authentication data...');
     const authData = loadAuthenticationData();
     
-    console.log('Converting to Firebase format...');
-    const firebaseData = convertToFirebaseFormat(authData);
+    console.log('Converting to storage format...');
+    const storageData = convertToStorageFormat(authData);
     
-    console.log('Seeding to Firebase...');
-    await seedInitialData(firebaseData);
+    console.log('Seeding to localStorage...');
+    await seedInitialData(storageData);
     
-    console.log('✅ Data successfully seeded to Firebase!');
+    console.log('✅ Data successfully seeded to localStorage!');
   } catch (error) {
     console.error('❌ Error seeding data:', error);
     throw error;
