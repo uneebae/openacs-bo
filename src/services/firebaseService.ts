@@ -3,7 +3,6 @@ import {
   addDoc,
   getDocs,
   query,
-  orderBy,
   Timestamp,
   DocumentData,
 } from 'firebase/firestore';
