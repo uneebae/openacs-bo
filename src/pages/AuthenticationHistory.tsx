@@ -10,8 +10,8 @@ import { Pagination } from '../components/common/Pagination';
 import { EmptyState } from '../components/common/EmptyState';
 import { Modal } from '../components/forms/Modal';
 import { Button } from '../components/forms/Button';
-import { loadAuthenticationData, generateAuthenticationExcel } from '../utils/generateAuthData';
-import { getAuthTransactions } from '../services/storageService';
+import { generateAuthenticationExcel } from '../utils/generateAuthData';
+import { getAuthTransactions } from '../services/firebaseService';
 import { seedDataToFirebase } from '../utils/seedFirebaseData';
 
 interface Transaction {
@@ -47,12 +47,14 @@ export function AuthenticationHistory() {
   const loadDataFromFirebase = async () => {
     setIsLoadingFromFirebase(true);
     try {
-      // Load from localStorage (instant, no timeout needed)
+      console.log('📥 Loading transactions from Firebase...');
+      // Load from Firebase
       const storageData = await getAuthTransactions();
+      console.log(`✅ Loaded ${storageData.length} transactions from Firebase`);
       
       if (storageData.length === 0) {
-        console.log('No data in storage, using local mock data');
-        loadLocalData();
+        console.log('⚠️ No data in Firebase, showing empty state');
+        setTransactions([]);
       } else {
         const transformedData: Transaction[] = (storageData as any).map((record: any, index: number) => {
           // Map 'Successful' → 'success', 'Failed' → 'failed', 'Rejected' → 'rejected'
@@ -75,31 +77,14 @@ export function AuthenticationHistory() {
           };
         });
         setTransactions(transformedData);
-        console.log('✅ Loaded', transformedData.length, 'transactions from storage');
+        console.log('✅ Transformed and loaded', transformedData.length, 'transactions');
       }
     } catch (error) {
-      console.error('Error loading from storage:', error);
-      loadLocalData();
+      console.error('❌ Error loading from Firebase:', error);
+      setTransactions([]);
     } finally {
       setIsLoadingFromFirebase(false);
     }
-  };
-
-  const loadLocalData = () => {
-    const excelData = loadAuthenticationData();
-    const transformedData: Transaction[] = excelData.map((record, index) => ({
-      id: index + 1,
-      dateTime: record['Date & Time'],
-      acsTransactionId: record['ACS Transaction ID'],
-      merchantName: record['Merchant Name'],
-      cardHolder: record['Card Holder'],
-      cardNumber: record['Card Number'],
-      amount: record['Amount'],
-      status: record['Status'].toLowerCase(),
-      transactionType: record['Transaction Type'],
-      scheme: record['Scheme']
-    }));
-    setTransactions(transformedData);
   };
 
   const handleSeedToFirebase = async () => {
@@ -297,10 +282,10 @@ ${new Date().toLocaleString()}
           <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              Data Storage: <span className="text-blue-600 dark:text-blue-400">Local Storage</span>
+              Data Storage: <span className="text-blue-600 dark:text-blue-400">Firebase Cloud</span>
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              All data is stored locally in your browser (offline capable)
+              Connected to Firebase Firestore (Cloud Database)
             </p>
           </div>
         </div>
