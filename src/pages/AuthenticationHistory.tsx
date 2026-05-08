@@ -12,7 +12,6 @@ import { Modal } from '../components/forms/Modal';
 import { Button } from '../components/forms/Button';
 import { generateAuthenticationExcel } from '../utils/generateAuthData';
 import { getAuthTransactions } from '../services/firebaseService';
-import { seedDataToFirebase } from '../utils/seedFirebaseData';
 
 interface Transaction {
   id: number;
@@ -37,7 +36,6 @@ export function AuthenticationHistory() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isLoadingFromFirebase, setIsLoadingFromFirebase] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
 
   // Load data on component mount
   useEffect(() => {
@@ -89,30 +87,6 @@ export function AuthenticationHistory() {
       setTransactions([]);
     } finally {
       setIsLoadingFromFirebase(false);
-    }
-  };
-
-  const handleSeedToFirebase = async () => {
-    if (!window.confirm('This will load 10 sample transactions. Continue?')) {
-      return;
-    }
-    
-    setIsSeeding(true);
-    console.log('🌱 Starting to seed sample data...');
-    try {
-      await seedDataToFirebase();
-      console.log('✅ Seeding complete!');
-      alert('✅ Sample data loaded successfully!');
-      // Small delay then reload
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('🔄 Reloading data from storage...');
-      await loadDataFromFirebase();
-      console.log('✅ Data reloaded!');
-      setIsSeeding(false);
-    } catch (error) {
-      console.error('❌ Error seeding data:', error);
-      alert('❌ Error loading sample data. Check console (F12) for details.');
-      setIsSeeding(false);
     }
   };
 
@@ -294,24 +268,14 @@ ${new Date().toLocaleString()}
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleSeedToFirebase}
-            disabled={isSeeding}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
-          >
-            <Database className="w-4 h-4" />
-            {isSeeding ? 'Seeding...' : 'Load Sample Data'}
-          </button>
-          <button
-            onClick={loadDataFromFirebase}
-            disabled={isLoadingFromFirebase}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoadingFromFirebase ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
+        <button
+          onClick={loadDataFromFirebase}
+          disabled={isLoadingFromFirebase}
+          className="px-4 py-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoadingFromFirebase ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
       
 
