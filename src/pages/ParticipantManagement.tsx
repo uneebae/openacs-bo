@@ -39,12 +39,6 @@ const mockParticipants = [
   }
 ];
 
-const participantTypeOptions = [
-  { value: 'issuer', label: 'Issuer' },
-  { value: 'acquirer', label: 'Acquirer' },
-  { value: 'both', label: 'Issuer & Acquirer' }
-];
-
 export function ParticipantManagement() {
   const [participants, setParticipants] = useState(mockParticipants);
   const [showModal, setShowModal] = useState(false);
@@ -227,14 +221,12 @@ export function ParticipantManagement() {
   const handleSubmit = () => {
     console.log('Submitting:', formData);
     
-    // Create new participant object
-    const typeLabel = participantTypeOptions.find(opt => opt.value === formData.type)?.label || formData.type;
-    
+    // Create new participant object with default type
     const newParticipant = {
       id: participants.length + 1,
       name: formData.name,
       bin: formData.bin,
-      type: typeLabel,
+      type: 'Issuer & Acquirer', // Default type
       contactPerson: formData.contactPerson,
       email: formData.primaryEmail,
       phone: formData.primaryMobile,
@@ -604,14 +596,6 @@ export function ParticipantManagement() {
                   onChange={(e) => setFormData({ ...formData, bin: e.target.value })}
                   leftIcon={<CreditCard size={18} />}
                   helperText="6-digit bank identification number"
-                  required
-                />
-
-                <Select
-                  label="Participant Type"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  options={participantTypeOptions}
                   required
                 />
 
