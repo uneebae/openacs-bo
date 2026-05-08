@@ -36,18 +36,18 @@ export function PageHeader({
           {onBack &&
         <button
           onClick={onBack}
-          className="p-1 hover:bg-soft-bg rounded-lg transition-colors"
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           aria-label="Go back">
           
-              <ArrowLeft className="h-4 w-4 text-gray-500" />
+              <ArrowLeft className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             </button>
         }
-          <p className="text-sm text-gray-500">{breadcrumb}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{breadcrumb}</p>
         </div>
       }
 
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-navy">{title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
         {primaryAction &&
         <motion.button
           whileHover={{
@@ -57,7 +57,7 @@ export function PageHeader({
             scale: 0.98
           }}
           onClick={primaryAction.onClick}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors shadow-sm hover:shadow-md">
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm hover:shadow-md">
           
             <Plus className="h-4 w-4" />
             {primaryAction.label}

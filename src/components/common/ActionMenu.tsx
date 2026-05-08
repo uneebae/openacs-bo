@@ -16,10 +16,10 @@ export function ActionMenu({ actions }: ActionMenuProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 hover:bg-soft-bg rounded-lg transition-colors"
+        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         aria-label="Actions">
         
-        <MoreVertical className="h-4 w-4 text-gray-600" />
+        <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       </button>
 
       <AnimatePresence>
@@ -48,7 +48,7 @@ export function ActionMenu({ actions }: ActionMenuProps) {
             transition={{
               duration: 0.15
             }}
-            className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-border overflow-hidden z-20">
+            className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-20">
             
               <div className="py-1">
                 {actions.map((action, index) =>
@@ -60,7 +60,7 @@ export function ActionMenu({ actions }: ActionMenuProps) {
                 }}
                 className={`
                       w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors
-                      ${action.variant === 'danger' ? 'text-error hover:bg-error-50' : 'text-navy hover:bg-soft-bg'}
+                      ${action.variant === 'danger' ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}
                     `}>
                 
                     {action.icon &&

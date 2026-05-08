@@ -242,7 +242,7 @@ export function ApiConfigManagement() {
       />
       
 
-      <div className="bg-white rounded-xl border border-border overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <Tabs
           tabs={[
           {

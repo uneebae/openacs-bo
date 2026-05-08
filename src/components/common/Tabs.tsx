@@ -12,7 +12,7 @@ interface TabsProps {
 }
 export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
   return (
-    <div className="border-b border-border">
+    <div className="border-b border-gray-200 dark:border-gray-700">
       <div className="flex gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -22,7 +22,7 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
               onClick={() => onChange(tab.id)}
               className={`
                 relative px-6 py-3 text-sm font-medium transition-colors
-                ${isActive ? 'text-primary' : 'text-gray-600 hover:text-navy'}
+                ${isActive ? 'text-primary dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}
               `}>
               
               <span className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
                 <span
                   className={`
                     px-2 py-0.5 rounded-full text-xs font-semibold
-                    ${isActive ? 'bg-primary-50 text-primary' : 'bg-gray-100 text-gray-600'}
+                    ${isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}
                   `}>
                   
                     {tab.count}
@@ -41,7 +41,7 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
               {isActive &&
               <motion.div
                 layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
                 transition={{
                   type: 'spring',
                   stiffness: 500,

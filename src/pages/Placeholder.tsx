@@ -36,7 +36,7 @@ export function Placeholder({
         <h1 className="text-3xl font-bold text-navy">{title}</h1>
       </div>
 
-      <div className="bg-white rounded-xl border border-border min-h-[400px] flex items-center justify-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 min-h-[400px] flex items-center justify-center">
         <EmptyState
           icon={icon}
           title={emptyTitle}
