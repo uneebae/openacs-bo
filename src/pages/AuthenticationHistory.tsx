@@ -54,18 +54,26 @@ export function AuthenticationHistory() {
         console.log('No data in storage, using local mock data');
         loadLocalData();
       } else {
-        const transformedData: Transaction[] = (storageData as any).map((record: any, index: number) => ({
-          id: index + 1,
-          dateTime: record.dateTime,
-          acsTransactionId: record.acsTransactionId,
-          merchantName: record.merchantName,
-          cardHolder: record.cardHolder,
-          cardNumber: record.cardNumber,
-          amount: record.amount,
-          status: record.status.toLowerCase(),
-          transactionType: record.transactionType,
-          scheme: record.scheme
-        }));
+        const transformedData: Transaction[] = (storageData as any).map((record: any, index: number) => {
+          // Map 'Successful' → 'success', 'Failed' → 'failed', 'Rejected' → 'rejected'
+          let normalizedStatus = 'failed';
+          if (record.status === 'Successful') normalizedStatus = 'success';
+          else if (record.status === 'Failed') normalizedStatus = 'failed';
+          else if (record.status === 'Rejected') normalizedStatus = 'rejected';
+          
+          return {
+            id: index + 1,
+            dateTime: record.dateTime,
+            acsTransactionId: record.acsTransactionId,
+            merchantName: record.merchantName,
+            cardHolder: record.cardHolder,
+            cardNumber: record.cardNumber,
+            amount: record.amount,
+            status: normalizedStatus,
+            transactionType: record.transactionType,
+            scheme: record.scheme
+          };
+        });
         setTransactions(transformedData);
         console.log('✅ Loaded', transformedData.length, 'transactions from storage');
       }
