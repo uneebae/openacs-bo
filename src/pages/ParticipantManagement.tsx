@@ -9,6 +9,7 @@ import { Textarea } from '../components/forms/Textarea';
 import { Switch } from '../components/forms/Switch';
 import { Checkbox } from '../components/forms/Checkbox';
 import { FileUpload } from '../components/forms/FileUpload';
+import { SmsOtpPreview, EmailOtpPreview, InAppOtpPreview, getActivePreview } from '../components/participant/ACSPreviewComponents';
 
 const mockParticipants = [
   {
@@ -1060,9 +1061,30 @@ export function ParticipantManagement() {
 
                   {/* ── Right column: live preview ── */}
                   <div className="lg:w-80 shrink-0">
-                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                      <Layout size={16} className="text-blue-600" /> Professional Preview
-                    </p>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                        <Layout size={16} className="text-blue-600" /> Professional Preview
+                      </p>
+                      {(() => {
+                        const activePreviewType = getActivePreview(formData.otpDeliveryMethods);
+                        const previewLabels = {
+                          sms: { label: 'SMS', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300', icon: Smartphone },
+                          email: { label: 'Email', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300', icon: Mail },
+                          inapp: { label: 'In-App', color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300', icon: MessageCircle }
+                        };
+                        
+                        if (activePreviewType && previewLabels[activePreviewType]) {
+                          const { label, color, icon: Icon } = previewLabels[activePreviewType];
+                          return (
+                            <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${color}`}>
+                              <Icon size={12} />
+                              {label}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
 
                     {/* Phone mockup - Professional Design */}
                     <div className="relative mx-auto w-64">
@@ -1146,101 +1168,42 @@ export function ParticipantManagement() {
 
                             {/* main content card */}
                             <div className="flex-1 flex items-center justify-center">
-                              <motion.div 
-                                className="w-full bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl p-5 space-y-4 backdrop-blur-xl border border-white/20 dark:border-gray-700/50"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1, duration: 0.4 }}
-                                style={{
-                                  boxShadow: '0 10px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)'
-                                }}
-                              >
-                                {/* header with icon */}
-                                <div className="text-center space-y-1">
-                                  <div className="flex justify-center mb-2">
-                                    <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-full">
-                                      <Lock size={14} className="text-blue-600" />
-                                    </div>
-                                  </div>
-                                  <p className="font-bold text-gray-800 dark:text-white text-sm leading-tight" style={{ fontFamily: formData.acsFontStyle }}>
-                                    Verify Your Identity
-                                  </p>
-                                  <p className="text-gray-500 dark:text-gray-400 text-[10px] leading-relaxed" style={{ fontFamily: formData.acsFontStyle }}>
-                                    Enter the 6-digit code sent to your device
-                                  </p>
-                                </div>
-
-                                {/* OTP input boxes - enhanced */}
-                                <div className="flex justify-center gap-2">
-                                  {[0,1,2,3,4,5].map(i => (
-                                    <motion.div 
-                                      key={i}
-                                      className="w-8 h-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-sm font-bold text-gray-400 dark:text-gray-500 bg-white/50 dark:bg-gray-800/50 transition-all hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md"
-                                      whileHover={{ scale: 1.05 }}
-                                      style={{ fontFamily: formData.acsFontStyle }}
-                                    />
-                                  ))}
-                                </div>
-
-                                {/* card info strip - enhanced */}
-                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg px-3 py-2.5 flex items-center justify-between border border-blue-200 dark:border-blue-800/50">
-                                  <div>
-                                    <p className="text-[8px] text-gray-500 dark:text-gray-400 uppercase tracking-wide font-semibold">Card</p>
-                                    <p className="text-xs font-mono text-gray-700 dark:text-gray-300 font-semibold">•••• •••• •••• 4242</p>
-                                  </div>
-                                  <CreditCard size={14} className="text-blue-600 dark:text-blue-400" />
-                                </div>
-
-                                {/* verify button - enhanced with gradient */}
-                                <motion.button
-                                  style={{ 
-                                    backgroundColor: formData.acsButtonColor,
-                                    fontFamily: formData.acsFontStyle,
-                                    backgroundImage: `linear-gradient(135deg, ${formData.acsButtonColor}dd, ${formData.acsButtonColor})`
-                                  }}
-                                  className="w-full py-2.5 rounded-lg text-white font-semibold text-sm shadow-lg transition-all transform hover:shadow-xl active:scale-95"
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                >
-                                  Verify Code
-                                </motion.button>
-
-                                {/* timer with animation */}
-                                <div className="flex justify-between items-center text-[10px] px-1">
-                                  <span className="text-gray-500 dark:text-gray-400">
-                                    Valid for <motion.span 
-                                      className="font-bold text-orange-600 dark:text-orange-400"
-                                      animate={{ opacity: [1, 0.6, 1] }}
-                                      transition={{ duration: 1, repeat: Infinity }}
-                                    >
-                                      00:30
-                                    </motion.span>
-                                  </span>
-                                  <motion.button 
-                                    className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 transition-colors"
-                                    whileHover={{ scale: 1.1 }}
-                                  >
-                                    Resend Code
-                                  </motion.button>
-                                </div>
-
-                                {/* contact link */}
-                                {formData.acsContactLink && (
-                                  <motion.div 
-                                    className="pt-2 border-t border-gray-200 dark:border-gray-700 text-center"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
-                                  >
-                                    <p className="text-[8px] text-gray-500 dark:text-gray-400">
-                                      <MessageCircle size={10} className="inline mr-1" />
-                                      <a href={`mailto:${formData.acsContactLink}`} className="text-blue-600 dark:text-blue-400 hover:underline font-medium truncate inline-block max-w-[80%]">
-                                        {formData.acsContactLink}
-                                      </a>
-                                    </p>
-                                  </motion.div>
-                                )}
-                              </motion.div>
+                              {(() => {
+                                const activePreviewType = getActivePreview(formData.otpDeliveryMethods);
+                                
+                                switch (activePreviewType) {
+                                  case 'sms':
+                                    return <SmsOtpPreview formData={formData} logoFile={logoFile} />;
+                                  case 'email':
+                                    return <EmailOtpPreview formData={formData} logoFile={logoFile} />;
+                                  case 'inapp':
+                                    return <InAppOtpPreview formData={formData} logoFile={logoFile} />;
+                                  default:
+                                    // Fallback preview when no delivery method is selected
+                                    return (
+                                      <motion.div 
+                                        className="w-full bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl p-5 space-y-4 backdrop-blur-xl border border-white/20 dark:border-gray-700/50"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1, duration: 0.4 }}
+                                      >
+                                        <div className="text-center space-y-2 py-8">
+                                          <div className="flex justify-center mb-3">
+                                            <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
+                                              <MessageSquare size={24} className="text-gray-400" />
+                                            </div>
+                                          </div>
+                                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                            No Delivery Method Selected
+                                          </p>
+                                          <p className="text-xs text-gray-500 dark:text-gray-500 max-w-[200px] mx-auto">
+                                            Please select at least one OTP delivery method in the Message Setup step to see the preview
+                                          </p>
+                                        </div>
+                                      </motion.div>
+                                    );
+                                }
+                              })()}
                             </div>
 
                             {/* bottom positioning logo if set */}
