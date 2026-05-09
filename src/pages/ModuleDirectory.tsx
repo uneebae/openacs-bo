@@ -24,6 +24,10 @@ interface Module {
     description: string;
   }[];
 }
+
+interface ModuleDirectoryProps {
+  onNavigate: (page: string) => void;
+}
 const modules: Module[] = [
 {
   id: 'roles',
@@ -192,10 +196,15 @@ const colorClasses: Record<string, { bg: string; icon: string; dot: string }> = 
   }
 };
 
-export function ModuleDirectory() {
+export function ModuleDirectory({ onNavigate }: ModuleDirectoryProps) {
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
+  
   const toggleModule = (id: string) => {
     setExpandedModule(expandedModule === id ? null : id);
+  };
+  
+  const handleModuleClick = (moduleId: string) => {
+    onNavigate(moduleId);
   };
   return (
     <motion.div
@@ -226,7 +235,7 @@ export function ModuleDirectory() {
               className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-lg transition-all"
             >
               <button
-                onClick={() => module.submodules && toggleModule(module.id)}
+                onClick={() => handleModuleClick(module.id)}
                 className="w-full flex items-center gap-4 p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left group"
               >
                 <div className={`flex-shrink-0 p-3 ${colors.bg} rounded-xl group-hover:scale-110 transition-transform shadow-sm`}>
@@ -241,7 +250,13 @@ export function ModuleDirectory() {
                   </p>
                 </div>
                 {module.submodules && (
-                  <div className={`flex-shrink-0 text-gray-400 dark:text-gray-500 group-hover:${colors.icon} transition-colors`}>
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleModule(module.id);
+                    }}
+                    className={`flex-shrink-0 text-gray-400 dark:text-gray-500 group-hover:${colors.icon} transition-colors cursor-pointer p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded`}
+                  >
                     {isExpanded ? (
                       <ChevronDown className="h-5 w-5" />
                     ) : (

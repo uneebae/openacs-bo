@@ -32,7 +32,7 @@ export function App() {
       case 'dashboard':
         return <Dashboard onNavigate={setCurrentPage} />;
       case 'modules':
-        return <ModuleDirectory />;
+        return <ModuleDirectory onNavigate={setCurrentPage} />;
       case 'roles':
         return <RoleManagement />;
       case 'users':
