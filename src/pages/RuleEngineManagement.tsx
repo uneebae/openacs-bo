@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Download, Edit, Trash2, Workflow, DollarSign, CreditCard, X, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
+import { Plus, Search, Download, Edit, Trash2, Workflow, X, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
 import { Modal } from '../components/forms/Modal';
 import { Input } from '../components/forms/Input';
 import { Select } from '../components/forms/Select';
 import { Button } from '../components/forms/Button';
-import { Textarea } from '../components/forms/Textarea';
-import { Switch } from '../components/forms/Switch';
-import { Checkbox } from '../components/forms/Checkbox';
 
 const mockRules = [
   {
@@ -39,30 +36,6 @@ const mockRules = [
   }
 ];
 
-const ruleTypeOptions = [
-  { value: 'amount', label: 'Amount Based' },
-  { value: 'velocity', label: 'Velocity Check' },
-  { value: 'geographic', label: 'Geographic' },
-  { value: 'time', label: 'Time Based' },
-  { value: 'merchant', label: 'Merchant Category' }
-];
-
-const actionOptions = [
-  { value: 'require_3ds', label: 'Require 3DS' },
-  { value: 'block', label: 'Block Transaction' },
-  { value: 'alert', label: 'Send Alert' },
-  { value: 'block_alert', label: 'Block & Alert' },
-  { value: 'review', label: 'Flag for Review' }
-];
-
-const conditionOperators = [
-  { value: 'gt', label: 'Greater Than (>)' },
-  { value: 'lt', label: 'Less Than (<)' },
-  { value: 'eq', label: 'Equal To (=)' },
-  { value: 'ne', label: 'Not Equal (!=)' },
-  { value: 'between', label: 'Between' }
-];
-
 // Mock data for bins
 const mockBins = [
   { id: '410283', name: '410283', scheme: 'visa' },
@@ -72,12 +45,14 @@ const mockBins = [
 ];
 
 const participantOptions = [
+  { value: '', label: 'Select participant' },
   { value: 'paysys', label: 'Paysys' },
   { value: 'paytech', label: 'PayTech' },
   { value: 'finserv', label: 'FinServ' },
 ];
 
 const currencyOptions = [
+  { value: '', label: 'Select currency' },
   { value: 'USD', label: 'USD' },
   { value: 'EUR', label: 'EUR' },
   { value: 'GBP', label: 'GBP' },
@@ -125,7 +100,6 @@ interface RuleConfiguration {
 export function RuleEngineManagement() {
   const [showModal, setShowModal] = useState(false);
   const [modalStep, setModalStep] = useState(1);
-  const [selectedRule, setSelectedRule] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -157,7 +131,6 @@ export function RuleEngineManagement() {
   });
 
   const handleAdd = () => {
-    setSelectedRule(null);
     setModalStep(1);
     setErrors({});
     setRuleConfig({
@@ -300,15 +273,10 @@ export function RuleEngineManagement() {
   };
 
   const handleEdit = (rule: any) => {
-    setSelectedRule(rule);
     // Load existing rule config here
+    console.log('Editing rule:', rule);
     setShowModal(true);
   };
-
-  const filteredRules = mockRules.filter(rule =>
-    rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rule.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   // Step 1 Modal Content - Add Rules
   const renderStep1 = () => (
@@ -321,7 +289,6 @@ export function RuleEngineManagement() {
           value={ruleConfig.participant}
           onChange={(e) => setRuleConfig({ ...ruleConfig, participant: e.target.value })}
           options={participantOptions}
-          placeholder="Select participant"
         />
         {errors.participant && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -598,7 +565,6 @@ export function RuleEngineManagement() {
             value={ruleConfig.currency}
             onChange={(e) => setRuleConfig({ ...ruleConfig, currency: e.target.value })}
             options={currencyOptions}
-            placeholder="Select currency"
           />
           <div>
             <div className="flex justify-between items-center mb-2">
