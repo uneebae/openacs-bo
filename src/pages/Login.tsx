@@ -282,7 +282,7 @@ export function Login({ onLogin }: LoginProps) {
               transition={{ delay: 0.5 }}
               className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400"
             >
-              Version 2.4.1 • © 2024 OpenACS
+              Version 2.4.1 • © 2026 OpenACS
             </motion.div>
           </div>
         </div>
