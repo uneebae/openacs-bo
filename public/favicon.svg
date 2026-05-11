@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Central document icon -->
+  <rect x="10" y="11.5" width="12" height="9" rx="1" fill="none" stroke="#E6B800" stroke-width="1.5"/>
+  
+  <!-- Document details -->
+  <line x1="11.5" y1="13.5" x2="20.5" y2="13.5" stroke="#E6B800" stroke-width="1" stroke-linecap="round"/>
+  <rect x="11.5" y="15" width="3.5" height="3.5" rx="0.5" fill="#E6B800"/>
+  <line x1="16" y1="16" x2="20.5" y2="16" stroke="#E6B800" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="16" y1="17.5" x2="20.5" y2="17.5" stroke="#E6B800" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="11.5" y1="19" x2="20.5" y2="19" stroke="#E6B800" stroke-width="0.8" stroke-linecap="round"/>
+  
+  <!-- Top circle -->
+  <circle cx="16" cy="4" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Top-right circle -->
+  <circle cx="27" cy="10" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Bottom-right circle -->
+  <circle cx="27" cy="22" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Bottom circle -->
+  <circle cx="16" cy="28" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Bottom-left circle -->
+  <circle cx="5" cy="22" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Top-left circle -->
+  <circle cx="5" cy="10" r="2.5" fill="none" stroke="#E6B800" stroke-width="1.2"/>
+  
+  <!-- Connecting arcs -->
+  <path d="M 17.5 5 Q 22 6.5 25 8.5" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round"/>
+  <path d="M 28 12 Q 29 16 28 20" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round" stroke-dasharray="2,1.5"/>
+  <path d="M 25 23.5 Q 21 26 17.5 27" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round"/>
+  <path d="M 14.5 27 Q 10 26 7 23.5" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round"/>
+  <path d="M 4 20 Q 3 16 4 12" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round" stroke-dasharray="2,1.5"/>
+  <path d="M 7 8.5 Q 11 6.5 14.5 5" fill="none" stroke="#E6B800" stroke-width="1" stroke-linecap="round"/>
+</svg>

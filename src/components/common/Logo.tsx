@@ -1,5 +1,4 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -21,8 +20,12 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <div className={`${sizeClasses[size]} rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30`}>
-        <Shield className="h-5 w-5 text-white" strokeWidth={2.5} />
+      <div className={`${sizeClasses[size]} flex items-center justify-center`}>
+        <img 
+          src="/logo.svg" 
+          alt="OpenACS Logo" 
+          className="w-full h-full object-contain"
+        />
       </div>
       {showText && (
         <span className={`${textSizeClasses[size]} font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent dark:from-primary-400 dark:to-primary-300`}>

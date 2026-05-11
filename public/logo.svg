@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background circle (optional, remove if transparent background needed) -->
+  
+  <!-- Central document icon -->
+  <rect x="125" y="145" width="150" height="110" rx="5" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Document header line -->
+  <line x1="145" y1="170" x2="255" y2="170" stroke="#E6B800" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Document image placeholder -->
+  <rect x="145" y="185" width="45" height="45" rx="3" fill="#E6B800"/>
+  
+  <!-- Document text lines -->
+  <line x1="200" y1="195" x2="255" y2="195" stroke="#E6B800" stroke-width="5" stroke-linecap="round"/>
+  <line x1="200" y1="210" x2="255" y2="210" stroke="#E6B800" stroke-width="5" stroke-linecap="round"/>
+  <line x1="200" y1="225" x2="255" y2="225" stroke="#E6B800" stroke-width="5" stroke-linecap="round"/>
+  <line x1="145" y1="240" x2="255" y2="240" stroke="#E6B800" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Top circle -->
+  <circle cx="200" cy="45" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Top-right circle -->
+  <circle cx="340" cy="120" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Bottom-right circle -->
+  <circle cx="340" cy="280" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Bottom circle -->
+  <circle cx="200" cy="355" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Bottom-left circle -->
+  <circle cx="60" cy="280" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Top-left circle -->
+  <circle cx="60" cy="120" r="25" fill="none" stroke="#E6B800" stroke-width="8"/>
+  
+  <!-- Connecting arcs -->
+  <!-- Top to top-right -->
+  <path d="M 220 55 Q 280 70 320 105" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round"/>
+  
+  <!-- Top-right to bottom-right -->
+  <path d="M 355 140 Q 370 200 355 260" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round" stroke-dasharray="15,10"/>
+  
+  <!-- Bottom-right to bottom -->
+  <path d="M 320 295 Q 260 330 220 345" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round"/>
+  
+  <!-- Bottom to bottom-left -->
+  <path d="M 180 345 Q 120 330 80 295" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round"/>
+  
+  <!-- Bottom-left to top-left -->
+  <path d="M 45 260 Q 30 200 45 140" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round" stroke-dasharray="15,10"/>
+  
+  <!-- Top-left to top -->
+  <path d="M 80 105 Q 140 70 180 55" fill="none" stroke="#E6B800" stroke-width="7" stroke-linecap="round"/>
+</svg>
