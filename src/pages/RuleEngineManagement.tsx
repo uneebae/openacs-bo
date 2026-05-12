@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Download, Edit, Trash2, Workflow, X, ChevronRight, AlertCircle, Calendar, Users, Layers, Copy } from 'lucide-react';
+import { Plus, Search, Download, Edit, Trash2, Workflow, ChevronRight, AlertCircle, Calendar, Users, Layers, Copy } from 'lucide-react';
 import { Modal } from '../components/forms/Modal';
 import { Input } from '../components/forms/Input';
 import { Select } from '../components/forms/Select';
@@ -64,21 +64,6 @@ const mockRules = [
   }
 ];
 
-// Mock data for bins
-const mockBins = [
-  { id: '410283', name: '410283', scheme: 'visa' },
-  { id: '445283', name: '445283', scheme: 'visa' },
-  { id: '510283', name: '510283', scheme: 'mastercard' },
-  { id: '552634', name: '552634', scheme: 'mastercard' },
-];
-
-const participantOptions = [
-  { value: '', label: 'Select participant' },
-  { value: 'paysys', label: 'Paysys' },
-  { value: 'paytech', label: 'PayTech' },
-  { value: 'finserv', label: 'FinServ' },
-];
-
 const currencyOptions = [
   { value: '', label: 'Select currency' },
   { value: 'USD', label: 'USD' },
@@ -92,7 +77,7 @@ const mockRuleGroups: RuleGroup[] = [
   {
     id: 1,
     name: 'High Value Transactions',
-    description: 'Comprehensive fraud prevention for high-value transactions',
+    description: 'Comprehensive fraud prevention for high-value transactions above $10,000',
     priority: 1,
     status: 'active',
     assignedUsers: ['user1', 'user2', 'user3'],
@@ -107,8 +92,8 @@ const mockRuleGroups: RuleGroup[] = [
   },
   {
     id: 2,
-    name: 'Fraud Prevention',
-    description: 'Advanced fraud detection and prevention rules',
+    name: 'Fraud Prevention Rules',
+    description: 'Advanced fraud detection using device fingerprinting and velocity checks',
     priority: 2,
     status: 'active',
     assignedUsers: ['user1', 'user4'],
@@ -124,7 +109,7 @@ const mockRuleGroups: RuleGroup[] = [
   {
     id: 3,
     name: 'International Transactions',
-    description: 'Rules for cross-border transaction verification',
+    description: 'Rules for cross-border transaction verification and currency validation',
     priority: 3,
     status: 'active',
     assignedUsers: ['user2', 'user3'],
@@ -139,7 +124,7 @@ const mockRuleGroups: RuleGroup[] = [
   {
     id: 4,
     name: 'ACS Transaction Rules',
-    description: 'Independent rule group for ACS transaction validation and security - not assigned to any users yet',
+    description: 'Independent rule group for ACS transaction validation and 3D Secure authentication',
     priority: 4,
     status: 'active',
     assignedUsers: [],
@@ -152,16 +137,137 @@ const mockRuleGroups: RuleGroup[] = [
       { name: 'Currency Code', enabled: true, rules: [] },
       { name: 'Amount Threshold', enabled: true, rules: [] },
     ]
+  },
+  {
+    id: 5,
+    name: 'New Customer Verification',
+    description: 'Enhanced verification rules for first-time customers and new accounts',
+    priority: 5,
+    status: 'active',
+    assignedUsers: ['user1', 'user5'],
+    assignedRoles: ['operations'],
+    createdDate: '2026-05-10',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 6,
+    name: 'Card Testing Detection',
+    description: 'Detect and prevent card testing attacks with velocity monitoring',
+    priority: 6,
+    status: 'active',
+    assignedUsers: ['user2', 'user4'],
+    assignedRoles: ['fraud_analyst'],
+    createdDate: '2026-04-28',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 7,
+    name: 'E-Commerce Risk Rules',
+    description: 'Specialized rules for online retail and e-commerce transactions',
+    priority: 7,
+    status: 'inactive',
+    assignedUsers: ['user3', 'user5'],
+    assignedRoles: ['operations', 'manager'],
+    createdDate: '2026-04-15',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+      { name: 'Currency Code', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 8,
+    name: 'Travel & Entertainment',
+    description: 'Rules optimized for travel, hospitality, and entertainment merchants',
+    priority: 8,
+    status: 'active',
+    assignedUsers: ['user1', 'user3', 'user4'],
+    assignedRoles: ['admin'],
+    createdDate: '2026-04-22',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Currency Code', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 9,
+    name: 'Recurring Payment Rules',
+    description: 'Validation rules for subscription and recurring payment transactions',
+    priority: 9,
+    status: 'active',
+    assignedUsers: ['user2'],
+    assignedRoles: ['operations'],
+    createdDate: '2026-05-03',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 10,
+    name: 'Low Risk Transactions',
+    description: 'Streamlined processing for low-risk, low-value transactions',
+    priority: 10,
+    status: 'inactive',
+    assignedUsers: [],
+    assignedRoles: [],
+    createdDate: '2026-04-18',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 11,
+    name: 'Mobile Payment Security',
+    description: 'Enhanced security rules for mobile wallet and app-based payments',
+    priority: 11,
+    status: 'active',
+    assignedUsers: ['user4', 'user5'],
+    assignedRoles: ['fraud_analyst', 'operations'],
+    createdDate: '2026-05-07',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+      { name: 'Transaction History', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 12,
+    name: 'Cryptocurrency Gateway',
+    description: 'Rules for crypto-to-fiat transaction validation and monitoring',
+    priority: 12,
+    status: 'inactive',
+    assignedUsers: ['user1'],
+    assignedRoles: ['admin'],
+    createdDate: '2026-04-12',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Currency Code', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
   }
 ];
 
 // Mock users for assignment
 const mockUsers: AssignedUser[] = [
   { id: 'user1', name: 'John Smith', email: 'john.smith@openacs.com', role: 'admin' },
-  { id: 'user2', name: 'Sarah Johnson', email: 'sarah.j@openacs.com', role: 'fraud_analyst' },
-  { id: 'user3', name: 'Michael Chen', email: 'michael.c@openacs.com', role: 'admin' },
-  { id: 'user4', name: 'Emma Wilson', email: 'emma.w@openacs.com', role: 'fraud_analyst' },
-  { id: 'user5', name: 'David Brown', email: 'david.b@openacs.com', role: 'operations' },
+  { id: 'user2', name: 'Sarah Johnson', email: 'sarah.johnson@openacs.com', role: 'fraud_analyst' },
+  { id: 'user3', name: 'Michael Chen', email: 'michael.chen@openacs.com', role: 'admin' },
+  { id: 'user4', name: 'Emma Wilson', email: 'emma.wilson@openacs.com', role: 'fraud_analyst' },
+  { id: 'user5', name: 'David Brown', email: 'david.brown@openacs.com', role: 'operations' },
+  { id: 'user6', name: 'Lisa Anderson', email: 'lisa.anderson@openacs.com', role: 'manager' },
+  { id: 'user7', name: 'Robert Taylor', email: 'robert.taylor@openacs.com', role: 'operations' },
+  { id: 'user8', name: 'Jennifer Lee', email: 'jennifer.lee@openacs.com', role: 'fraud_analyst' },
 ];
 
 const roleOptions = [
@@ -314,40 +420,8 @@ export function RuleEngineManagement() {
     }
   };
 
-  const handleSchemeToggle = (scheme: string) => {
-    setRuleConfig(prev => ({
-      ...prev,
-      filterSchemes: prev.filterSchemes.includes(scheme)
-        ? prev.filterSchemes.filter(s => s !== scheme)
-        : [...prev.filterSchemes, scheme]
-    }));
-  };
-
-  const handleBinToggle = (binId: string) => {
-    setRuleConfig(prev => ({
-      ...prev,
-      selectedBins: prev.selectedBins.includes(binId)
-        ? prev.selectedBins.filter(b => b !== binId)
-        : [...prev.selectedBins, binId]
-    }));
-  };
-
-  const validateStep1 = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!ruleConfig.participant) {
-      newErrors.participant = 'Please select a participant';
-    }
-    if (ruleConfig.filterSchemes.length === 0) {
-      newErrors.filterSchemes = 'Please select at least one scheme';
-    }
-    if (ruleConfig.selectedBins.length === 0) {
-      newErrors.selectedBins = 'Please select at least one BIN';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Step 1 (Participant/BIN) removed - no longer needed
+  // Functions handleSchemeToggle, handleBinToggle, getFilteredBins removed
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -425,10 +499,8 @@ export function RuleEngineManagement() {
   };
 
   const handleNextStep = () => {
-    if (modalStep === 1 && validateStep1()) {
+    if (modalStep === 1 && validateStep2()) {
       setModalStep(2);
-    } else if (modalStep === 2 && validateStep2()) {
-      setModalStep(3);
     }
   };
 
@@ -619,132 +691,14 @@ export function RuleEngineManagement() {
     }
   };
 
-  const getFilteredBins = () => {
-    if (ruleConfig.filterSchemes.length === 0) return mockBins;
-    return mockBins.filter(bin => ruleConfig.filterSchemes.includes(bin.scheme));
-  };
-
   const handleEdit = (rule: any) => {
     // Load existing rule config here
     console.log('Editing rule:', rule);
     setShowModal(true);
   };
 
-  // Step 1 Modal Content - Add Rules
+  // Step 1 Modal Content - Configure Rules (previously Step 2)
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Participant
-        </label>
-        <Select
-          value={ruleConfig.participant}
-          onChange={(e) => setRuleConfig({ ...ruleConfig, participant: e.target.value })}
-          options={participantOptions}
-        />
-        {errors.participant && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-            <AlertCircle size={14} /> {errors.participant}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Filter Scheme
-        </label>
-        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-          <button
-            onClick={() => handleSchemeToggle('mastercard')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              ruleConfig.filterSchemes.includes('mastercard')
-                ? 'bg-primary-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            Mastercard
-          </button>
-          <button
-            onClick={() => handleSchemeToggle('visa')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              ruleConfig.filterSchemes.includes('visa')
-                ? 'bg-primary-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            Visa
-          </button>
-          <button
-            onClick={() => {
-              setRuleConfig({ ...ruleConfig, filterSchemes: [] });
-            }}
-            className="ml-auto p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        {errors.filterSchemes && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-            <AlertCircle size={14} /> {errors.filterSchemes}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Bin Selection
-        </label>
-        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          Chosen {ruleConfig.selectedBins.length}/{getFilteredBins().length} selected
-        </div>
-        
-        <div className="space-y-2 max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
-          {getFilteredBins().length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p>No bins found!</p>
-              <p className="text-sm mt-1">Select a filter scheme above</p>
-            </div>
-          ) : (
-            getFilteredBins().map((bin) => (
-              <div
-                key={bin.id}
-                onClick={() => handleBinToggle(bin.id)}
-                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                  ruleConfig.selectedBins.includes(bin.id)
-                    ? 'bg-primary-600 text-white shadow-md'
-                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${
-                    ruleConfig.selectedBins.includes(bin.id) ? 'bg-white' : 'bg-primary-600'
-                  }`} />
-                  <span className="font-medium">{bin.name}</span>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBinToggle(bin.id);
-                  }}
-                  className="p-1 hover:bg-white/20 rounded"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-        {errors.selectedBins && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-            <AlertCircle size={14} /> {errors.selectedBins}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-
-  // Step 2 Modal Content - Set Configuration
-  const renderStep2 = () => (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
       {/* Transaction History */}
       <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
@@ -1068,7 +1022,8 @@ export function RuleEngineManagement() {
   );
 
   // Step 3 Modal Content - Name Group & Assign Users
-  const renderStep3 = () => (
+  // Step 2 Modal Content - Name & Priority (previously Step 3)
+  const renderStep2 = () => (
     <div className="space-y-6">
       <div className="space-y-4">
         <Input
@@ -1109,77 +1064,9 @@ export function RuleEngineManagement() {
         />
       </div>
 
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assign to Users <span className="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></h3>
-          <Button variant="ghost" size="sm" onClick={handleSelectAllUsers}>
-            {selectedUsers.length === mockUsers.length ? 'Deselect All' : 'Select All'}
-          </Button>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          You can assign this rule group to users now or skip and assign later using the "Assign" button.
-        </p>
-        
-        <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
-          {mockUsers.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 transition-all cursor-pointer"
-              onClick={() => handleUserToggle(user.id)}
-            >
-              <Checkbox
-                checked={selectedUsers.includes(user.id)}
-                onChange={() => handleUserToggle(user.id)}
-              />
-              <div className="flex-1">
-                <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
-              </div>
-              <span className="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400">
-                {user.role}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Assign to Roles <span className="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Assign to roles for automatic access to all users with that role.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          {roleOptions.map((role) => (
-            <button
-              key={role.value}
-              onClick={() => handleRoleToggle(role.value)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedRoles.includes(role.value)
-                  ? 'bg-primary-600 text-white shadow-md'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-primary-400'
-              }`}
-            >
-              {role.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className={`border rounded-lg p-4 ${
-        selectedUsers.length === 0 && selectedRoles.length === 0
-          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
-          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-      }`}>
-        <p className={`text-sm ${
-          selectedUsers.length === 0 && selectedRoles.length === 0
-            ? 'text-amber-800 dark:text-amber-200'
-            : 'text-blue-800 dark:text-blue-200'
-        }`}>
-          <strong>Summary:</strong> {
-            selectedUsers.length === 0 && selectedRoles.length === 0
-              ? 'This rule group will be created without any user or role assignments. You can assign users later via the "Assign" button on the rule group card.'
-              : `This rule group will be assigned to ${selectedUsers.length} user(s)${selectedRoles.length > 0 ? ` and ${selectedRoles.length} role(s)` : ''}. All assigned users will have access to view and use these rules.`
-          }
+      <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>Note:</strong> This rule group will be created as an independent group with a unique ID. You can assign users or roles later using the "Assign" button on the rule group card.
         </p>
       </div>
     </div>
@@ -1533,18 +1420,14 @@ export function RuleEngineManagement() {
         }}
         title={
           selectedGroup 
-            ? (modalStep === 1 ? 'Edit: Select Participant & BINs' :
-               modalStep === 2 ? 'Edit: Configure Rules' :
-               'Edit: Name & Assign Group')
-            : (modalStep === 1 ? 'Step 1: Select Participant & BINs' :
-               modalStep === 2 ? 'Step 2: Configure Rules' :
-               'Step 3: Name & Assign Group')
+            ? (modalStep === 1 ? 'Edit: Configure Rules' : 'Edit: Name & Priority')
+            : (modalStep === 1 ? 'Step 1: Configure Rules' : 'Step 2: Name & Priority')
         }
         size="xl"
         footer={
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              {[1, 2, 3].map((step) => (
+              {[1, 2].map((step) => (
                 <div
                   key={step}
                   className={`h-2 w-12 rounded-full transition-all ${
@@ -1582,7 +1465,7 @@ export function RuleEngineManagement() {
               }}>
                 Cancel
               </Button>
-              {modalStep < 3 ? (
+              {modalStep < 2 ? (
                 <Button variant="primary" onClick={handleNextStep} rightIcon={<ChevronRight size={18} />}>
                   Next
                 </Button>
@@ -1595,7 +1478,7 @@ export function RuleEngineManagement() {
           </div>
         }
       >
-        {modalStep === 1 ? renderStep1() : modalStep === 2 ? renderStep2() : renderStep3()}
+        {modalStep === 1 ? renderStep1() : renderStep2()}
       </Modal>
     </motion.div>
   );
