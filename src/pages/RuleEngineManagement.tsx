@@ -135,6 +135,23 @@ const mockRuleGroups: RuleGroup[] = [
       { name: 'Currency Code', enabled: true, rules: [] },
       { name: 'Amount Threshold', enabled: true, rules: [] },
     ]
+  },
+  {
+    id: 4,
+    name: 'ACS Transaction Rules',
+    description: 'Independent rule group for ACS transaction validation and security - not assigned to any users yet',
+    priority: 4,
+    status: 'active',
+    assignedUsers: [],
+    assignedRoles: [],
+    createdDate: '2026-05-12',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+      { name: 'Currency Code', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
   }
 ];
 
@@ -396,12 +413,15 @@ export function RuleEngineManagement() {
     if (!ruleGroupDescription.trim()) {
       newErrors.ruleGroupDescription = 'Description is required';
     }
-    if (selectedUsers.length === 0 && selectedRoles.length === 0) {
-      newErrors.assignment = 'Please assign to at least one user or role';
-    }
+    // User/role assignment is now optional - groups can be created without assignments
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const generateUniqueId = (): number => {
+    // Generate unique ID based on timestamp and random number
+    return Date.now() + Math.floor(Math.random() * 1000);
   };
 
   const handleNextStep = () => {
@@ -444,9 +464,9 @@ export function RuleEngineManagement() {
           alert(`Rule group "${ruleGroupName}" has been updated successfully!`);
         }
       } else {
-        // Create new group
+        // Create new group with unique ID
         const newRuleGroup: RuleGroup = {
-          id: mockRuleGroups.length + 1,
+          id: generateUniqueId(),
           name: ruleGroupName,
           description: ruleGroupDescription,
           priority: ruleGroupPriority,
@@ -464,7 +484,10 @@ export function RuleEngineManagement() {
         };
         mockRuleGroups.push(newRuleGroup);
         console.log('Created rule group:', newRuleGroup);
-        alert(`Rule group "${ruleGroupName}" has been created successfully!`);
+        const assignmentMsg = selectedUsers.length > 0 || selectedRoles.length > 0 
+          ? ` and assigned to ${selectedUsers.length} user(s) and ${selectedRoles.length} role(s)`
+          : ' (no assignments yet - can be assigned later)';
+        alert(`Rule group "${ruleGroupName}" has been created successfully${assignmentMsg}!`);
       }
       setShowModal(false);
       setModalStep(1);
@@ -514,7 +537,7 @@ export function RuleEngineManagement() {
   const handleDuplicateGroup = (group: RuleGroup) => {
     const duplicatedGroup: RuleGroup = {
       ...group,
-      id: mockRuleGroups.length + 1,
+      id: generateUniqueId(),
       name: `${group.name} (Copy)`,
       createdDate: new Date().toISOString().split('T')[0],
       assignedUsers: [],
@@ -523,7 +546,7 @@ export function RuleEngineManagement() {
     mockRuleGroups.push(duplicatedGroup);
     console.log('Duplicated rule group:', duplicatedGroup);
     // Show success message
-    alert(`Rule group "${group.name}" has been duplicated successfully!`);
+    alert(`Rule group "${group.name}" has been duplicated successfully! No users assigned - assign later as needed.`);
   };
 
   const handleDeleteGroup = (groupId: number) => {
@@ -1057,12 +1080,15 @@ export function RuleEngineManagement() {
       </div>
 
       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assign to Users</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assign to Users <span className="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></h3>
           <Button variant="ghost" size="sm" onClick={handleSelectAllUsers}>
             {selectedUsers.length === mockUsers.length ? 'Deselect All' : 'Select All'}
           </Button>
         </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          You can assign this rule group to users now or skip and assign later using the "Assign" button.
+        </p>
         
         <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
           {mockUsers.map((user) => (
@@ -1088,7 +1114,10 @@ export function RuleEngineManagement() {
       </div>
 
       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assign to Roles</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Assign to Roles <span className="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Assign to roles for automatic access to all users with that role.
+        </p>
         <div className="flex flex-wrap gap-3">
           {roleOptions.map((role) => (
             <button
@@ -1104,18 +1133,23 @@ export function RuleEngineManagement() {
             </button>
           ))}
         </div>
-        {errors.assignment && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-            <AlertCircle size={14} /> {errors.assignment}
-          </p>
-        )}
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>Summary:</strong> This rule group will be assigned to {selectedUsers.length} user(s) 
-          {selectedRoles.length > 0 && ` and ${selectedRoles.length} role(s)`}. 
-          All assigned users will have access to view and use these rules.
+      <div className={`border rounded-lg p-4 ${
+        selectedUsers.length === 0 && selectedRoles.length === 0
+          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+      }`}>
+        <p className={`text-sm ${
+          selectedUsers.length === 0 && selectedRoles.length === 0
+            ? 'text-amber-800 dark:text-amber-200'
+            : 'text-blue-800 dark:text-blue-200'
+        }`}>
+          <strong>Summary:</strong> {
+            selectedUsers.length === 0 && selectedRoles.length === 0
+              ? 'This rule group will be created without any user or role assignments. You can assign users later via the "Assign" button on the rule group card.'
+              : `This rule group will be assigned to ${selectedUsers.length} user(s)${selectedRoles.length > 0 ? ` and ${selectedRoles.length} role(s)` : ''}. All assigned users will have access to view and use these rules.`
+          }
         </p>
       </div>
     </div>
@@ -1136,7 +1170,7 @@ export function RuleEngineManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Rule Engine Management</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Configure and manage transaction authentication rule groups</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Create independent rule groups for ACS and assign to users/roles as needed</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="md" leftIcon={<Download size={18} />}>Export</Button>
@@ -1243,12 +1277,31 @@ export function RuleEngineManagement() {
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Assigned Users:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{group.assignedUsers.length}</span>
+                    <span className={`font-medium ${
+                      group.assignedUsers.length === 0 
+                        ? 'text-gray-500 dark:text-gray-400 italic' 
+                        : 'text-gray-900 dark:text-white'
+                    }`}>
+                      {group.assignedUsers.length === 0 ? 'None' : group.assignedUsers.length}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Assigned Roles:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{group.assignedRoles.length}</span>
+                    <span className={`font-medium ${
+                      group.assignedRoles.length === 0 
+                        ? 'text-gray-500 dark:text-gray-400 italic' 
+                        : 'text-gray-900 dark:text-white'
+                    }`}>
+                      {group.assignedRoles.length === 0 ? 'None' : group.assignedRoles.length}
+                    </span>
                   </div>
+                  {group.assignedUsers.length === 0 && group.assignedRoles.length === 0 && (
+                    <div className="pt-1 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <AlertCircle size={12} /> Independent group - assign users to activate
+                      </p>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Created:</span>
                     <span className="font-medium text-gray-900 dark:text-white">{new Date(group.createdDate).toLocaleDateString()}</span>
