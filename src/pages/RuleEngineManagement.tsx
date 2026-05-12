@@ -238,6 +238,7 @@ export function RuleEngineManagement() {
   const handleAdd = () => {
     setModalStep(1);
     setErrors({});
+    setSelectedGroup(null); // Reset selected group for new creation
     setRuleGroupName('');
     setRuleGroupDescription('');
     setRuleGroupPriority(1);
@@ -420,27 +421,54 @@ export function RuleEngineManagement() {
 
   const handleSubmit = () => {
     if (validateStep3()) {
-      const newRuleGroup: RuleGroup = {
-        id: mockRuleGroups.length + 1,
-        name: ruleGroupName,
-        description: ruleGroupDescription,
-        priority: ruleGroupPriority,
-        status: 'active',
-        assignedUsers: selectedUsers,
-        assignedRoles: selectedRoles,
-        createdDate: new Date().toISOString().split('T')[0],
-        ruleConfig: ruleConfig,
-        categories: [
-          { name: 'Transaction History', enabled: !!ruleConfig.transactionHistoryWeightage, rules: [] },
-          { name: 'Device Fingerprint', enabled: !!ruleConfig.deviceFingerprintWeightage, rules: [] },
-          { name: 'Currency Code', enabled: !!ruleConfig.currencyCodeWeightage, rules: [] },
-          { name: 'Amount Threshold', enabled: !!ruleConfig.amountThresholdWeightage, rules: [] },
-        ]
-      };
-      console.log('Creating rule group:', newRuleGroup);
-      // Here you would typically save to Firebase or your backend
+      if (selectedGroup) {
+        // Update existing group
+        const index = mockRuleGroups.findIndex(g => g.id === selectedGroup.id);
+        if (index !== -1) {
+          mockRuleGroups[index] = {
+            ...mockRuleGroups[index],
+            name: ruleGroupName,
+            description: ruleGroupDescription,
+            priority: ruleGroupPriority,
+            assignedUsers: selectedUsers,
+            assignedRoles: selectedRoles,
+            ruleConfig: ruleConfig,
+            categories: [
+              { name: 'Transaction History', enabled: !!ruleConfig.transactionHistoryWeightage, rules: [] },
+              { name: 'Device Fingerprint', enabled: !!ruleConfig.deviceFingerprintWeightage, rules: [] },
+              { name: 'Currency Code', enabled: !!ruleConfig.currencyCodeWeightage, rules: [] },
+              { name: 'Amount Threshold', enabled: !!ruleConfig.amountThresholdWeightage, rules: [] },
+            ]
+          };
+          console.log('Updated rule group:', mockRuleGroups[index]);
+          alert(`Rule group "${ruleGroupName}" has been updated successfully!`);
+        }
+      } else {
+        // Create new group
+        const newRuleGroup: RuleGroup = {
+          id: mockRuleGroups.length + 1,
+          name: ruleGroupName,
+          description: ruleGroupDescription,
+          priority: ruleGroupPriority,
+          status: 'active',
+          assignedUsers: selectedUsers,
+          assignedRoles: selectedRoles,
+          createdDate: new Date().toISOString().split('T')[0],
+          ruleConfig: ruleConfig,
+          categories: [
+            { name: 'Transaction History', enabled: !!ruleConfig.transactionHistoryWeightage, rules: [] },
+            { name: 'Device Fingerprint', enabled: !!ruleConfig.deviceFingerprintWeightage, rules: [] },
+            { name: 'Currency Code', enabled: !!ruleConfig.currencyCodeWeightage, rules: [] },
+            { name: 'Amount Threshold', enabled: !!ruleConfig.amountThresholdWeightage, rules: [] },
+          ]
+        };
+        mockRuleGroups.push(newRuleGroup);
+        console.log('Created rule group:', newRuleGroup);
+        alert(`Rule group "${ruleGroupName}" has been created successfully!`);
+      }
       setShowModal(false);
       setModalStep(1);
+      setSelectedGroup(null);
     }
   };
 
@@ -457,21 +485,84 @@ export function RuleEngineManagement() {
         users: selectedUsers,
         roles: selectedRoles
       });
-      // Here you would update the group assignments
+      // Update the group in the list
+      const updatedIndex = mockRuleGroups.findIndex(g => g.id === selectedGroup.id);
+      if (updatedIndex !== -1) {
+        mockRuleGroups[updatedIndex] = {
+          ...mockRuleGroups[updatedIndex],
+          assignedUsers: selectedUsers,
+          assignedRoles: selectedRoles
+        };
+      }
       setShowAssignModal(false);
       setSelectedGroup(null);
     }
   };
 
+  const handleEditGroup = (group: RuleGroup) => {
+    setSelectedGroup(group);
+    setRuleGroupName(group.name);
+    setRuleGroupDescription(group.description);
+    setRuleGroupPriority(group.priority);
+    setSelectedUsers(group.assignedUsers);
+    setSelectedRoles(group.assignedRoles);
+    setRuleConfig(group.ruleConfig);
+    setModalStep(3); // Start at step 3 for editing (name and assignment)
+    setShowModal(true);
+  };
+
   const handleDuplicateGroup = (group: RuleGroup) => {
-    console.log('Duplicating rule group:', group.name);
-    // Here you would create a copy of the group
+    const duplicatedGroup: RuleGroup = {
+      ...group,
+      id: mockRuleGroups.length + 1,
+      name: `${group.name} (Copy)`,
+      createdDate: new Date().toISOString().split('T')[0],
+      assignedUsers: [],
+      assignedRoles: []
+    };
+    mockRuleGroups.push(duplicatedGroup);
+    console.log('Duplicated rule group:', duplicatedGroup);
+    // Show success message
+    alert(`Rule group "${group.name}" has been duplicated successfully!`);
   };
 
   const handleDeleteGroup = (groupId: number) => {
-    if (confirm('Are you sure you want to delete this rule group?')) {
-      console.log('Deleting rule group:', groupId);
-      // Here you would delete the group
+    if (confirm('Are you sure you want to delete this rule group? This action cannot be undone.')) {
+      const index = mockRuleGroups.findIndex(g => g.id === groupId);
+      if (index !== -1) {
+        const deletedGroup = mockRuleGroups[index];
+        mockRuleGroups.splice(index, 1);
+        console.log('Deleted rule group:', deletedGroup.name);
+        alert(`Rule group "${deletedGroup.name}" has been deleted successfully.`);
+      }
+    }
+  };
+
+  const handleToggleGroupStatus = (groupId: number) => {
+    const group = mockRuleGroups.find(g => g.id === groupId);
+    if (group) {
+      group.status = group.status === 'active' ? 'inactive' : 'active';
+      console.log(`Toggled status for group ${group.name} to ${group.status}`);
+    }
+  };
+
+  const handleDeleteRule = (ruleId: number) => {
+    if (confirm('Are you sure you want to delete this rule? This action cannot be undone.')) {
+      const index = mockRules.findIndex(r => r.id === ruleId);
+      if (index !== -1) {
+        const deletedRule = mockRules[index];
+        mockRules.splice(index, 1);
+        console.log('Deleted rule:', deletedRule.name);
+        alert(`Rule "${deletedRule.name}" has been deleted successfully.`);
+      }
+    }
+  };
+
+  const handleToggleRuleStatus = (ruleId: number) => {
+    const rule = mockRules.find(r => r.id === ruleId);
+    if (rule) {
+      rule.status = rule.status === 'active' ? 'inactive' : 'active';
+      console.log(`Toggled status for rule ${rule.name} to ${rule.status}`);
     }
   };
 
@@ -1123,11 +1214,15 @@ export function RuleEngineManagement() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">{group.categories.filter(c => c.enabled).length} categories</p>
                   </div>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                  group.status === 'active' 
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
-                }`}>
+                <span 
+                  onClick={() => handleToggleGroupStatus(group.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition-all hover:scale-105 ${
+                    group.status === 'active' 
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                  title="Click to toggle status"
+                >
                   {group.status}
                 </span>
               </div>
@@ -1165,9 +1260,9 @@ export function RuleEngineManagement() {
                 <Button variant="outline" size="sm" leftIcon={<Users size={14} />} onClick={() => handleAssignUsers(group)} className="flex-1">
                   Assign
                 </Button>
-                <Button variant="ghost" size="sm" leftIcon={<Copy size={14} />} onClick={() => handleDuplicateGroup(group)} />
-                <Button variant="ghost" size="sm" leftIcon={<Edit size={14} />} />
-                <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} onClick={() => handleDeleteGroup(group.id)} />
+                <Button variant="ghost" size="sm" leftIcon={<Copy size={14} />} onClick={() => handleDuplicateGroup(group)} title="Duplicate" />
+                <Button variant="ghost" size="sm" leftIcon={<Edit size={14} />} onClick={() => handleEditGroup(group)} title="Edit" />
+                <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} onClick={() => handleDeleteGroup(group.id)} title="Delete" />
               </div>
             </motion.div>
           ))}
@@ -1196,11 +1291,15 @@ export function RuleEngineManagement() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">{rule.type}</p>
                 </div>
               </div>
-              <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                rule.status === 'active' 
-                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
-              }`}>
+              <span 
+                onClick={() => handleToggleRuleStatus(rule.id)}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition-all hover:scale-105 ${
+                  rule.status === 'active' 
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+                title="Click to toggle status"
+              >
                 {rule.status}
               </span>
             </div>
@@ -1219,7 +1318,7 @@ export function RuleEngineManagement() {
               <Button variant="outline" size="sm" leftIcon={<Edit size={14} />} onClick={() => handleEdit(rule)} className="flex-1">
                 Edit
               </Button>
-              <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} />
+              <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} onClick={() => handleDeleteRule(rule.id)} title="Delete" />
             </div>
           </motion.div>
         ))}
@@ -1308,11 +1407,16 @@ export function RuleEngineManagement() {
         onClose={() => {
           setShowModal(false);
           setModalStep(1);
+          setSelectedGroup(null);
         }}
         title={
-          modalStep === 1 ? 'Step 1: Select Participant & BINs' :
-          modalStep === 2 ? 'Step 2: Configure Rules' :
-          'Step 3: Name & Assign Group'
+          selectedGroup 
+            ? (modalStep === 1 ? 'Edit: Select Participant & BINs' :
+               modalStep === 2 ? 'Edit: Configure Rules' :
+               'Edit: Name & Assign Group')
+            : (modalStep === 1 ? 'Step 1: Select Participant & BINs' :
+               modalStep === 2 ? 'Step 2: Configure Rules' :
+               'Step 3: Name & Assign Group')
         }
         size="xl"
         footer={
@@ -1340,6 +1444,7 @@ export function RuleEngineManagement() {
               <Button variant="outline" onClick={() => {
                 setShowModal(false);
                 setModalStep(1);
+                setSelectedGroup(null);
               }}>
                 Cancel
               </Button>
@@ -1349,7 +1454,7 @@ export function RuleEngineManagement() {
                 </Button>
               ) : (
                 <Button variant="primary" onClick={handleSubmit}>
-                  Create Rule Group
+                  {selectedGroup ? 'Update Rule Group' : 'Create Rule Group'}
                 </Button>
               )}
             </div>
