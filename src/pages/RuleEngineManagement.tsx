@@ -1,10 +1,38 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Download, Edit, Trash2, Workflow, X, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
+import { Plus, Search, Download, Edit, Trash2, Workflow, X, ChevronRight, AlertCircle, Calendar, Users, Layers, Copy } from 'lucide-react';
 import { Modal } from '../components/forms/Modal';
 import { Input } from '../components/forms/Input';
 import { Select } from '../components/forms/Select';
 import { Button } from '../components/forms/Button';
+import { Checkbox } from '../components/forms/Checkbox';
+
+// Interfaces for Rule Groups
+interface RuleGroup {
+  id: number;
+  name: string;
+  description: string;
+  priority: number;
+  status: 'active' | 'inactive';
+  assignedUsers: string[];
+  assignedRoles: string[];
+  createdDate: string;
+  ruleConfig: RuleConfiguration;
+  categories: RuleCategory[];
+}
+
+interface RuleCategory {
+  name: string;
+  enabled: boolean;
+  rules: any[];
+}
+
+interface AssignedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 const mockRules = [
   {
@@ -59,6 +87,73 @@ const currencyOptions = [
   { value: 'JPY', label: 'JPY' },
 ];
 
+// Mock data for rule groups
+const mockRuleGroups: RuleGroup[] = [
+  {
+    id: 1,
+    name: 'High Value Transactions',
+    description: 'Comprehensive fraud prevention for high-value transactions',
+    priority: 1,
+    status: 'active',
+    assignedUsers: ['user1', 'user2', 'user3'],
+    assignedRoles: ['admin', 'fraud_analyst'],
+    createdDate: '2026-05-01',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 2,
+    name: 'Fraud Prevention',
+    description: 'Advanced fraud detection and prevention rules',
+    priority: 2,
+    status: 'active',
+    assignedUsers: ['user1', 'user4'],
+    assignedRoles: ['fraud_analyst'],
+    createdDate: '2026-05-05',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Transaction History', enabled: true, rules: [] },
+      { name: 'Device Fingerprint', enabled: true, rules: [] },
+      { name: 'Currency Code', enabled: true, rules: [] },
+    ]
+  },
+  {
+    id: 3,
+    name: 'International Transactions',
+    description: 'Rules for cross-border transaction verification',
+    priority: 3,
+    status: 'active',
+    assignedUsers: ['user2', 'user3'],
+    assignedRoles: ['admin'],
+    createdDate: '2026-05-08',
+    ruleConfig: {} as RuleConfiguration,
+    categories: [
+      { name: 'Currency Code', enabled: true, rules: [] },
+      { name: 'Amount Threshold', enabled: true, rules: [] },
+    ]
+  }
+];
+
+// Mock users for assignment
+const mockUsers: AssignedUser[] = [
+  { id: 'user1', name: 'John Smith', email: 'john.smith@openacs.com', role: 'admin' },
+  { id: 'user2', name: 'Sarah Johnson', email: 'sarah.j@openacs.com', role: 'fraud_analyst' },
+  { id: 'user3', name: 'Michael Chen', email: 'michael.c@openacs.com', role: 'admin' },
+  { id: 'user4', name: 'Emma Wilson', email: 'emma.w@openacs.com', role: 'fraud_analyst' },
+  { id: 'user5', name: 'David Brown', email: 'david.b@openacs.com', role: 'operations' },
+];
+
+const roleOptions = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'fraud_analyst', label: 'Fraud Analyst' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'manager', label: 'Manager' },
+];
+
 interface RuleConfiguration {
   // Step 1
   participant: string;
@@ -102,6 +197,16 @@ export function RuleEngineManagement() {
   const [modalStep, setModalStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState<'rules' | 'groups'>('groups');
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<RuleGroup | null>(null);
+  
+  // Rule Group specific state
+  const [ruleGroupName, setRuleGroupName] = useState('');
+  const [ruleGroupDescription, setRuleGroupDescription] = useState('');
+  const [ruleGroupPriority, setRuleGroupPriority] = useState(1);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   
   const [ruleConfig, setRuleConfig] = useState<RuleConfiguration>({
     participant: '',
@@ -133,6 +238,11 @@ export function RuleEngineManagement() {
   const handleAdd = () => {
     setModalStep(1);
     setErrors({});
+    setRuleGroupName('');
+    setRuleGroupDescription('');
+    setRuleGroupPriority(1);
+    setSelectedUsers([]);
+    setSelectedRoles([]);
     setRuleConfig({
       participant: '',
       filterSchemes: [],
@@ -160,6 +270,30 @@ export function RuleEngineManagement() {
       effectiveDate: '',
     });
     setShowModal(true);
+  };
+
+  const handleUserToggle = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleRoleToggle = (role: string) => {
+    setSelectedRoles(prev =>
+      prev.includes(role)
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    );
+  };
+
+  const handleSelectAllUsers = () => {
+    if (selectedUsers.length === mockUsers.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(mockUsers.map(u => u.id));
+    }
   };
 
   const handleSchemeToggle = (scheme: string) => {
@@ -252,18 +386,92 @@ export function RuleEngineManagement() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateStep3 = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!ruleGroupName.trim()) {
+      newErrors.ruleGroupName = 'Rule group name is required';
+    }
+    if (!ruleGroupDescription.trim()) {
+      newErrors.ruleGroupDescription = 'Description is required';
+    }
+    if (selectedUsers.length === 0 && selectedRoles.length === 0) {
+      newErrors.assignment = 'Please assign to at least one user or role';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleNextStep = () => {
     if (modalStep === 1 && validateStep1()) {
       setModalStep(2);
+    } else if (modalStep === 2 && validateStep2()) {
+      setModalStep(3);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (modalStep > 1) {
+      setModalStep(modalStep - 1);
+      setErrors({});
     }
   };
 
   const handleSubmit = () => {
-    if (validateStep2()) {
-      console.log('Submitting rule configuration:', ruleConfig);
+    if (validateStep3()) {
+      const newRuleGroup: RuleGroup = {
+        id: mockRuleGroups.length + 1,
+        name: ruleGroupName,
+        description: ruleGroupDescription,
+        priority: ruleGroupPriority,
+        status: 'active',
+        assignedUsers: selectedUsers,
+        assignedRoles: selectedRoles,
+        createdDate: new Date().toISOString().split('T')[0],
+        ruleConfig: ruleConfig,
+        categories: [
+          { name: 'Transaction History', enabled: !!ruleConfig.transactionHistoryWeightage, rules: [] },
+          { name: 'Device Fingerprint', enabled: !!ruleConfig.deviceFingerprintWeightage, rules: [] },
+          { name: 'Currency Code', enabled: !!ruleConfig.currencyCodeWeightage, rules: [] },
+          { name: 'Amount Threshold', enabled: !!ruleConfig.amountThresholdWeightage, rules: [] },
+        ]
+      };
+      console.log('Creating rule group:', newRuleGroup);
       // Here you would typically save to Firebase or your backend
       setShowModal(false);
       setModalStep(1);
+    }
+  };
+
+  const handleAssignUsers = (group: RuleGroup) => {
+    setSelectedGroup(group);
+    setSelectedUsers(group.assignedUsers);
+    setSelectedRoles(group.assignedRoles);
+    setShowAssignModal(true);
+  };
+
+  const handleSaveAssignment = () => {
+    if (selectedGroup) {
+      console.log('Updating assignments for group:', selectedGroup.id, {
+        users: selectedUsers,
+        roles: selectedRoles
+      });
+      // Here you would update the group assignments
+      setShowAssignModal(false);
+      setSelectedGroup(null);
+    }
+  };
+
+  const handleDuplicateGroup = (group: RuleGroup) => {
+    console.log('Duplicating rule group:', group.name);
+    // Here you would create a copy of the group
+  };
+
+  const handleDeleteGroup = (groupId: number) => {
+    if (confirm('Are you sure you want to delete this rule group?')) {
+      console.log('Deleting rule group:', groupId);
+      // Here you would delete the group
     }
   };
 
@@ -715,9 +923,121 @@ export function RuleEngineManagement() {
     </div>
   );
 
+  // Step 3 Modal Content - Name Group & Assign Users
+  const renderStep3 = () => (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Input
+          label="Rule Group Name"
+          placeholder="e.g., High Value Transactions, Fraud Prevention"
+          value={ruleGroupName}
+          onChange={(e) => setRuleGroupName(e.target.value)}
+          required
+        />
+        {errors.ruleGroupName && (
+          <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+            <AlertCircle size={14} /> {errors.ruleGroupName}
+          </p>
+        )}
+
+        <Input
+          label="Description"
+          placeholder="Describe the purpose of this rule group"
+          value={ruleGroupDescription}
+          onChange={(e) => setRuleGroupDescription(e.target.value)}
+          required
+        />
+        {errors.ruleGroupDescription && (
+          <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+            <AlertCircle size={14} /> {errors.ruleGroupDescription}
+          </p>
+        )}
+
+        <Input
+          label="Priority"
+          type="number"
+          min="1"
+          max="100"
+          value={ruleGroupPriority}
+          onChange={(e) => setRuleGroupPriority(parseInt(e.target.value) || 1)}
+          helperText="Lower numbers = higher priority (executed first)"
+          required
+        />
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assign to Users</h3>
+          <Button variant="ghost" size="sm" onClick={handleSelectAllUsers}>
+            {selectedUsers.length === mockUsers.length ? 'Deselect All' : 'Select All'}
+          </Button>
+        </div>
+        
+        <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+          {mockUsers.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 transition-all cursor-pointer"
+              onClick={() => handleUserToggle(user.id)}
+            >
+              <Checkbox
+                checked={selectedUsers.includes(user.id)}
+                onChange={() => handleUserToggle(user.id)}
+              />
+              <div className="flex-1">
+                <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+              </div>
+              <span className="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400">
+                {user.role}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assign to Roles</h3>
+        <div className="flex flex-wrap gap-3">
+          {roleOptions.map((role) => (
+            <button
+              key={role.value}
+              onClick={() => handleRoleToggle(role.value)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                selectedRoles.includes(role.value)
+                  ? 'bg-primary-600 text-white shadow-md'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-primary-400'
+              }`}
+            >
+              {role.label}
+            </button>
+          ))}
+        </div>
+        {errors.assignment && (
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+            <AlertCircle size={14} /> {errors.assignment}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>Summary:</strong> This rule group will be assigned to {selectedUsers.length} user(s) 
+          {selectedRoles.length > 0 && ` and ${selectedRoles.length} role(s)`}. 
+          All assigned users will have access to view and use these rules.
+        </p>
+      </div>
+    </div>
+  );
+
   const filteredRules = mockRules.filter(rule =>
     rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rule.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredRuleGroups = mockRuleGroups.filter(group =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    group.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -725,27 +1045,139 @@ export function RuleEngineManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Rule Engine Management</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Configure transaction authentication rules</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Configure and manage transaction authentication rule groups</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="md" leftIcon={<Download size={18} />}>Export</Button>
           <Button variant="primary" size="md" leftIcon={<Plus size={18} />} onClick={handleAdd}>
-            Add Rule
+            Create Rule Group
           </Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-1">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('groups')}
+            className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+              activeTab === 'groups'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Layers size={18} />
+              <span>Rule Groups ({mockRuleGroups.length})</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('rules')}
+            className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+              activeTab === 'rules'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Workflow size={18} />
+              <span>Individual Rules ({mockRules.length})</span>
+            </div>
+          </button>
         </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
         <Input
-          placeholder="Search rules by name or description..."
+          placeholder={`Search ${activeTab === 'groups' ? 'rule groups' : 'rules'} by name or description...`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           leftIcon={<Search size={18} />}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredRules.map((rule, index) => (
+      {/* Rule Groups Display */}
+      {activeTab === 'groups' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredRuleGroups.map((group, index) => (
+            <motion.div
+              key={group.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -4, boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)' }}
+              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 transition-all"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <Layers className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{group.name}</h3>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-medium">
+                        P{group.priority}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{group.categories.filter(c => c.enabled).length} categories</p>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                  group.status === 'active' 
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
+                }`}>
+                  {group.status}
+                </span>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">{group.description}</p>
+                
+                {/* Categories */}
+                <div className="flex flex-wrap gap-2">
+                  {group.categories.filter(c => c.enabled).map((category, idx) => (
+                    <span key={idx} className="text-xs px-2.5 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 font-medium">
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Assignment Info */}
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Assigned Users:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{group.assignedUsers.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Assigned Roles:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{group.assignedRoles.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Created:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{new Date(group.createdDate).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" size="sm" leftIcon={<Users size={14} />} onClick={() => handleAssignUsers(group)} className="flex-1">
+                  Assign
+                </Button>
+                <Button variant="ghost" size="sm" leftIcon={<Copy size={14} />} onClick={() => handleDuplicateGroup(group)} />
+                <Button variant="ghost" size="sm" leftIcon={<Edit size={14} />} />
+                <Button variant="ghost" size="sm" leftIcon={<Trash2 size={14} />} onClick={() => handleDeleteGroup(group.id)} />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Individual Rules Display */}
+      {activeTab === 'rules' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredRules.map((rule, index) => (
           <motion.div
             key={rule.id}
             initial={{ opacity: 0, y: 20 }}
@@ -791,37 +1223,140 @@ export function RuleEngineManagement() {
             </div>
           </motion.div>
         ))}
-      </div>
+        </div>
+      )}
 
+      {/* User Assignment Modal */}
+      <Modal
+        isOpen={showAssignModal}
+        onClose={() => {
+          setShowAssignModal(false);
+          setSelectedGroup(null);
+        }}
+        title={`Assign Users - ${selectedGroup?.name}`}
+        size="lg"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button variant="outline" onClick={() => {
+              setShowAssignModal(false);
+              setSelectedGroup(null);
+            }}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSaveAssignment}>
+              Save Assignment
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assign to Users</h3>
+              <Button variant="ghost" size="sm" onClick={handleSelectAllUsers}>
+                {selectedUsers.length === mockUsers.length ? 'Deselect All' : 'Select All'}
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+              {mockUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 transition-all cursor-pointer"
+                  onClick={() => handleUserToggle(user.id)}
+                >
+                  <Checkbox
+                    checked={selectedUsers.includes(user.id)}
+                    onChange={() => handleUserToggle(user.id)}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400">
+                    {user.role}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assign to Roles</h3>
+            <div className="flex flex-wrap gap-3">
+              {roleOptions.map((role) => (
+                <button
+                  key={role.value}
+                  onClick={() => handleRoleToggle(role.value)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedRoles.includes(role.value)
+                      ? 'bg-primary-600 text-white shadow-md'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-primary-400'
+                  }`}
+                >
+                  {role.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Create Rule Group Modal */}
       <Modal
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
           setModalStep(1);
         }}
-        title={modalStep === 1 ? 'Add Rules' : 'Set Configuration'}
+        title={
+          modalStep === 1 ? 'Step 1: Select Participant & BINs' :
+          modalStep === 2 ? 'Step 2: Configure Rules' :
+          'Step 3: Name & Assign Group'
+        }
         size="xl"
         footer={
-          <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={() => {
-              setShowModal(false);
-              setModalStep(1);
-            }}>
-              Cancel
-            </Button>
-            {modalStep === 1 ? (
-              <Button variant="primary" onClick={handleNextStep} rightIcon={<ChevronRight size={18} />}>
-                Set Configuration
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`h-2 w-12 rounded-full transition-all ${
+                    step === modalStep
+                      ? 'bg-primary-600'
+                      : step < modalStep
+                      ? 'bg-primary-400'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              {modalStep > 1 && (
+                <Button variant="outline" onClick={handlePrevStep}>
+                  Back
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => {
+                setShowModal(false);
+                setModalStep(1);
+              }}>
+                Cancel
               </Button>
-            ) : (
-              <Button variant="primary" onClick={handleSubmit}>
-                Save
-              </Button>
-            )}
+              {modalStep < 3 ? (
+                <Button variant="primary" onClick={handleNextStep} rightIcon={<ChevronRight size={18} />}>
+                  Next
+                </Button>
+              ) : (
+                <Button variant="primary" onClick={handleSubmit}>
+                  Create Rule Group
+                </Button>
+              )}
+            </div>
           </div>
         }
       >
-        {modalStep === 1 ? renderStep1() : renderStep2()}
+        {modalStep === 1 ? renderStep1() : modalStep === 2 ? renderStep2() : renderStep3()}
       </Modal>
     </motion.div>
   );
