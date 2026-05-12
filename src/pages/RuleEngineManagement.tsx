@@ -529,8 +529,38 @@ export function RuleEngineManagement() {
     setRuleGroupPriority(group.priority);
     setSelectedUsers(group.assignedUsers);
     setSelectedRoles(group.assignedRoles);
-    setRuleConfig(group.ruleConfig);
-    setModalStep(3); // Start at step 3 for editing (name and assignment)
+    
+    // Ensure ruleConfig has all required fields with defaults
+    const editConfig: RuleConfiguration = {
+      participant: group.ruleConfig?.participant || '',
+      filterSchemes: group.ruleConfig?.filterSchemes || [],
+      selectedBins: group.ruleConfig?.selectedBins || [],
+      transactionHistoryWeightage: group.ruleConfig?.transactionHistoryWeightage || '',
+      lowActivityVelocity: group.ruleConfig?.lowActivityVelocity || 10,
+      lowActivityScore: group.ruleConfig?.lowActivityScore || 10,
+      mediumActivityVelocity: group.ruleConfig?.mediumActivityVelocity || 50,
+      mediumActivityScore: group.ruleConfig?.mediumActivityScore || 40,
+      highActivityVelocity: group.ruleConfig?.highActivityVelocity || 100,
+      highActivityScore: group.ruleConfig?.highActivityScore || 70,
+      lookbackPeriod: group.ruleConfig?.lookbackPeriod || 30,
+      deviceFingerprintWeightage: group.ruleConfig?.deviceFingerprintWeightage || '',
+      deviceScore: group.ruleConfig?.deviceScore || 30,
+      currencyCodeWeightage: group.ruleConfig?.currencyCodeWeightage || '',
+      currency: group.ruleConfig?.currency || '',
+      currencyScore: group.ruleConfig?.currencyScore || 50,
+      amountThresholdWeightage: group.ruleConfig?.amountThresholdWeightage || '',
+      lowAmountLimit: group.ruleConfig?.lowAmountLimit || '',
+      lowAmountScore: group.ruleConfig?.lowAmountScore || 0,
+      mediumAmountLimit: group.ruleConfig?.mediumAmountLimit || '',
+      mediumAmountScore: group.ruleConfig?.mediumAmountScore || 0,
+      highAmountLimit: group.ruleConfig?.highAmountLimit || '',
+      highAmountScore: group.ruleConfig?.highAmountScore || 0,
+      effectiveDate: group.ruleConfig?.effectiveDate || '',
+    };
+    
+    setRuleConfig(editConfig);
+    setModalStep(1); // Start at step 1 for proper navigation
+    setErrors({});
     setShowModal(true);
   };
 
@@ -1458,9 +1488,48 @@ export function RuleEngineManagement() {
       <Modal
         isOpen={showModal}
         onClose={() => {
-          setShowModal(false);
-          setModalStep(1);
-          setSelectedGroup(null);
+          try {
+            setShowModal(false);
+            setModalStep(1);
+            setSelectedGroup(null);
+            setErrors({});
+            // Reset all form state
+            setRuleGroupName('');
+            setRuleGroupDescription('');
+            setRuleGroupPriority(1);
+            setSelectedUsers([]);
+            setSelectedRoles([]);
+            setRuleConfig({
+              participant: '',
+              filterSchemes: [],
+              selectedBins: [],
+              transactionHistoryWeightage: '',
+              lowActivityVelocity: 10,
+              lowActivityScore: 10,
+              mediumActivityVelocity: 50,
+              mediumActivityScore: 40,
+              highActivityVelocity: 100,
+              highActivityScore: 70,
+              lookbackPeriod: 30,
+              deviceFingerprintWeightage: '',
+              deviceScore: 30,
+              currencyCodeWeightage: '',
+              currency: '',
+              currencyScore: 50,
+              amountThresholdWeightage: '',
+              lowAmountLimit: '',
+              lowAmountScore: 0,
+              mediumAmountLimit: '',
+              mediumAmountScore: 0,
+              highAmountLimit: '',
+              highAmountScore: 0,
+              effectiveDate: '',
+            });
+          } catch (error) {
+            console.error('Error closing modal:', error);
+            // Force close anyway
+            setShowModal(false);
+          }
         }}
         title={
           selectedGroup 
@@ -1495,9 +1564,21 @@ export function RuleEngineManagement() {
                 </Button>
               )}
               <Button variant="outline" onClick={() => {
-                setShowModal(false);
-                setModalStep(1);
-                setSelectedGroup(null);
+                try {
+                  setShowModal(false);
+                  setModalStep(1);
+                  setSelectedGroup(null);
+                  setErrors({});
+                  // Reset form state
+                  setRuleGroupName('');
+                  setRuleGroupDescription('');
+                  setRuleGroupPriority(1);
+                  setSelectedUsers([]);
+                  setSelectedRoles([]);
+                } catch (error) {
+                  console.error('Error in cancel handler:', error);
+                  setShowModal(false);
+                }
               }}>
                 Cancel
               </Button>
